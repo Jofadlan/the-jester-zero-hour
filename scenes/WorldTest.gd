@@ -6,6 +6,7 @@ extends Node2D
 @onready var btn_slot1 = $UI/VBoxContainer/BtnSlot1
 @onready var btn_slot2 = $UI/VBoxContainer/BtnSlot2
 @onready var btn_go_combat = $UI/VBoxContainer/BtnGoCombat
+@onready var btn_go_boss = $UI/VBoxContainer/BtnGoBoss
 
 
 var selected_joker: JokerData = null
@@ -16,6 +17,7 @@ func _ready():
 	btn_slot1.pressed.connect(_on_equip_slot1)
 	btn_slot2.pressed.connect(_on_equip_slot2)
 	btn_go_combat.pressed.connect(_on_go_combat)
+	btn_go_boss.pressed.connect(_on_go_boss)
 	_update_info()
 
 func _on_pick_nightly():
@@ -67,7 +69,13 @@ func _show_feedback(message: String, success: bool):
 	_update_info()
 
 
+func _on_go_boss():
+	GameManager.combat_mode = "boss"
+	get_tree().change_scene_to_file("res://scenes/CombatScene.tscn")
+
+# update _on_go_combat() juga:
 func _on_go_combat():
+	GameManager.combat_mode = "normal"
 	get_tree().change_scene_to_file("res://scenes/CombatScene.tscn")
 
 func _update_info():

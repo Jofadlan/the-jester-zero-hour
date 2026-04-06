@@ -36,3 +36,7 @@ text = "Equip ke Slot 2"
 [node name="BtnGoCombat" type="Button" parent="UI/VBoxContainer" unique_id=617361786]
 layout_mode = 2
 text = "Masuk Combat"
+
+[node name="BtnGoBoss" type="Button" parent="UI/VBoxContainer" unique_id=1115765210]
+layout_mode = 2
+text = "Lawan Boss (Test)"

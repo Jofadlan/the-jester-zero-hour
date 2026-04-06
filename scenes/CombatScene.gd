@@ -30,6 +30,11 @@ var max_hands: int = 4
 var stage: int = 1
 var nightly_prowess_active: bool = false
 var oily_torch_used: bool = false
+var oily_torch_pending: bool = false
+var is_boss_fight: bool = false
+var boss_data: BossData = null
+var current_boss_stage: int = 0
+var current_stage_effect: String = ""
 
 const HAND_NAMES = {
 	0: "High Card", 1: "Pair", 2: "Two Pair",
@@ -41,24 +46,31 @@ const HAND_NAMES = {
 func _ready():
 	evaluator = HandEvaluator.new()
 	jp_manager.jp_changed.connect(_on_jp_changed)
-	jp_manager.reset_for_duel(0)
 	
-	jp_manager.reset_for_duel(GameManager.get_joker_count())
-	_update_joker_display()
-
 	btn_play.pressed.connect(_on_play_pressed)
 	btn_discard.pressed.connect(_on_discard_pressed)
+	btn_joker1.pressed.connect(_on_joker_slot_pressed.bind(0))
+	btn_joker2.pressed.connect(_on_joker_slot_pressed.bind(1))
 	btn_continue.pressed.connect(_on_continue_pressed)
 	btn_stop.pressed.connect(_on_stop_pressed)
-
+	
 	btn_play.disabled = true
 	btn_discard.disabled = true
 	overlay.visible = false
 	
-	btn_slot1.pressed.connect(_on_joker_slot_pressed.bind(0))
-	btn_slot2.pressed.connect(_on_joker_slot_pressed.bind(1))
-
+	# Setup combat berdasarkan mode
+	if GameManager.combat_mode == "boss":
+		var boss = BossData.new("THE LOVERS", [
+			BossData.StageData.new(300),
+			BossData.StageData.new(500, "discard_random_2")
+		])
+		setup_boss_combat(boss)
+	else:
+		setup_normal_combat()
+		jp_manager.reset_for_duel(GameManager.get_joker_count())
+	
 	_update_ui()
+	_update_joker_display()
 	_deal_hand()
 
 func _deal_hand():
@@ -98,7 +110,6 @@ func _on_play_pressed():
 	var eval_result = evaluator.evaluate(selected_cards)
 	var score = eval_result["score"]
 	
-	# Nightly Prowess — upgrade hand type satu tier
 	if nightly_prowess_active:
 		var upgraded_type = min(eval_result["hand_type"] + 1, 9)
 		var upgraded_base = HandEvaluator.HAND_DATA[upgraded_type]
@@ -107,9 +118,9 @@ func _on_play_pressed():
 		nightly_prowess_active = false
 		hand_type_label.text = "✦ Upgraded! +" + str(score) + " pts"
 	
-	# Oily Torch — score x2
 	if oily_torch_used:
 		score *= 2
+		oily_torch_pending = true
 		oily_torch_used = false
 	
 	current_score += score
@@ -119,6 +130,7 @@ func _on_play_pressed():
 		hand_type_label.text = HAND_NAMES.get(eval_result["hand_type"], "?") + \
 			"  +  " + str(score) + " pts"
 	
+	# Ganti kartu yang dimainkan
 	for card in selected_cards:
 		deck_manager.hand.erase(card)
 		deck_manager.discard_pile.append(card)
@@ -130,17 +142,39 @@ func _on_play_pressed():
 				deck_manager.hand.append(deck_manager.draw_pile.pop_back())
 	
 	selected_cards.clear()
+	
+	# Efek boss stage — discard 2 kartu random
+	if current_stage_effect == "discard_random_2":
+		_apply_discard_random(2)
+	
 	_update_ui()
 	_render_hand()
 	_update_buttons()
+	_update_joker_display()
 
 	if current_score >= target_score:
-		_show_overlay_win()
+		_check_win()
 		return
 
 	if hands_played >= max_hands:
 		_show_overlay_lose()
 		return
+
+func _apply_discard_random(amount: int):
+	var available = deck_manager.hand.duplicate()
+	available.shuffle()
+	var to_discard = available.slice(0, min(amount, available.size()))
+	for card in to_discard:
+		deck_manager.hand.erase(card)
+		deck_manager.discard_pile.append(card)
+		# Langsung ganti dengan kartu baru dari draw pile
+		if not deck_manager.draw_pile.is_empty():
+			deck_manager.hand.append(deck_manager.draw_pile.pop_back())
+		elif not deck_manager.discard_pile.is_empty():
+			deck_manager.refill_from_discard()
+			if not deck_manager.draw_pile.is_empty():
+				deck_manager.hand.append(deck_manager.draw_pile.pop_back())
+	hand_type_label.text += "\n⚠ " + str(to_discard.size()) + " kartu dibuang paksa!"
 
 func _on_discard_pressed():
 	if selected_cards.is_empty():
@@ -178,13 +212,11 @@ func _show_overlay_win():
 	selected_cards.clear()
 	for child in hand_container.get_children():
 		child.queue_free()
-	overlay_title.text = "STAGE CLEAR"
-	overlay_sub.text = "Score: " + str(current_score) + " / " + str(target_score) + \
-		"\nStage " + str(stage) + " selesai.\nLanjut ke stage berikutnya?"
-	btn_continue.visible = true
+	overlay_title.text = "VICTORY"
+	overlay_sub.text = "Score: " + str(current_score) + " / " + str(target_score)
+	btn_continue.visible = false
 	btn_stop.visible = true
-	btn_continue.text = "Lanjut (Target: " + str(int(target_score * 1.33)) + ")"
-	btn_stop.text = "Stop di sini"
+	btn_stop.text = "Selesai"
 	overlay.visible = true
 
 func _show_overlay_lose():
@@ -204,45 +236,66 @@ func _show_overlay_lose():
 	overlay.visible = true
 
 func _on_continue_pressed():
-	stage += 1
-	target_score = int(target_score * 1.33)
-	if oily_torch_used:
-		target_score = int(target_score * 2)
-		oily_torch_used = false
-	current_score = 0
-	hands_played = 0
-	nightly_prowess_active = false
-	
-	# Reset JP dengan perhitungkan jumlah Joker
-	jp_manager.reset_for_duel(GameManager.get_joker_count())
-	
-	deck_manager.shuffle_deck()
-	overlay.visible = false
-	
-	# Re-enable semua tombol
-	btn_discard.disabled = false
-	btn_joker1.disabled = false
-	btn_joker2.disabled = false
-	
-	_update_ui()
-	_update_joker_display()
-	_deal_hand()
-
-func _on_stop_pressed():
-	if btn_stop.text == "Coba Lagi":
-		stage = 1
-		target_score = 300
-		current_score = 0
-		hands_played = 0
-		jp_manager.reset_for_duel(0)
+	if is_boss_fight:
+		if oily_torch_pending:
+			boss_data.stages[current_boss_stage].target_score = \
+				int(boss_data.stages[current_boss_stage].target_score * 2)
+			oily_torch_pending = false
+			
+		_apply_boss_stage(current_boss_stage)
 		deck_manager.shuffle_deck()
 		overlay.visible = false
+		btn_discard.disabled = false
+		btn_joker1.disabled = false
+		btn_joker2.disabled = false
 		_update_ui()
+		_update_joker_display()
 		_deal_hand()
 	else:
+		stage += 1
+		target_score = int(target_score * 1.33)
+		if oily_torch_pending:
+			target_score = int(target_score * 2)
+			oily_torch_pending = false
+		current_score = 0
+		hands_played = 0
+		nightly_prowess_active = false
+		jp_manager.reset_for_duel(GameManager.get_joker_count())
+		deck_manager.shuffle_deck()
 		overlay.visible = false
-		hand_type_label.text = "Kamu berhenti di Stage " + str(stage) + \
-			" dengan score " + str(current_score)
+		btn_discard.disabled = false
+		btn_joker1.disabled = false
+		btn_joker2.disabled = false
+		_update_ui()
+		_update_joker_display()
+		_deal_hand()
+
+func _on_stop_pressed():
+	if is_boss_fight:
+		# Kalah boss atau selesai → balik ke world
+		GameManager.combat_mode = "normal"
+		get_tree().change_scene_to_file("res://scenes/WorldTest.tscn")
+	else:
+		if btn_stop.text == "Coba Lagi":
+			stage = 1
+			target_score = 300
+			current_score = 0
+			hands_played = 0
+			nightly_prowess_active = false
+			oily_torch_pending = false
+			jp_manager.reset_for_duel(GameManager.get_joker_count())
+			deck_manager.shuffle_deck()
+			overlay.visible = false
+			btn_discard.disabled = false
+			btn_joker1.disabled = false
+			btn_joker2.disabled = false
+			_update_ui()
+			_update_joker_display()
+			_deal_hand()
+		else:
+			overlay.visible = false
+			hand_type_label.text = "Kamu berhenti di Stage " + str(stage) + \
+				" dengan score " + str(current_score)
 
 func _update_joker_display():
 	for i in 2:
@@ -281,3 +334,76 @@ func activate_joker(slot_index: int) -> bool:
 func _on_joker_slot_pressed(slot_index: int):
 	if activate_joker(slot_index):
 		_update_joker_display()
+		
+func setup_normal_combat():
+	is_boss_fight = false
+	target_score = 300
+	max_hands = 4
+	current_stage_effect = ""
+
+func setup_boss_combat(boss: BossData):
+	is_boss_fight = true
+	boss_data = boss
+	current_boss_stage = 0
+	_apply_boss_stage(0)
+
+func _apply_boss_stage(stage_index: int):
+	var stage = boss_data.stages[stage_index]
+	target_score = stage.target_score
+	current_stage_effect = stage.effect
+	max_hands = 4
+	current_score = 0
+	hands_played = 0
+	jp_manager.reset_for_duel(GameManager.get_joker_count())
+	
+	# Update label stage
+	hand_type_label.text = "[ " + boss_data.display_name + \
+		" — Stage " + str(stage_index + 1) + "/" + \
+		str(boss_data.stages.size()) + " ]"
+	
+	if current_stage_effect == "discard_random_2":
+		hand_type_label.text += "\n⚠ Efek: 2 kartu random dibuang tiap play hand"
+
+func _check_win():
+	if is_boss_fight:
+		var next_stage = current_boss_stage + 1
+		if next_stage < boss_data.stages.size():
+			# Lanjut ke stage boss berikutnya
+			current_boss_stage = next_stage
+			_show_overlay_boss_next()
+		else:
+			# Boss defeated
+			_show_overlay_boss_defeated()
+	else:
+		_show_overlay_win()
+
+func _show_overlay_boss_next():
+	btn_play.disabled = true
+	btn_discard.disabled = true
+	btn_joker1.disabled = true
+	btn_joker2.disabled = true
+	selected_cards.clear()
+	for child in hand_container.get_children():
+		child.queue_free()
+	overlay_title.text = "STAGE " + str(current_boss_stage) + " CLEAR"
+	overlay_sub.text = "Bersiap untuk stage berikutnya...\n" + \
+		"Target: " + str(boss_data.stages[current_boss_stage].target_score)
+	btn_continue.visible = true
+	btn_stop.visible = false
+	btn_continue.text = "Lanjutkan"
+	overlay.visible = true
+
+func _show_overlay_boss_defeated():
+	btn_play.disabled = true
+	btn_discard.disabled = true
+	btn_joker1.disabled = true
+	btn_joker2.disabled = true
+	selected_cards.clear()
+	for child in hand_container.get_children():
+		child.queue_free()
+	overlay_title.text = "✦ BOSS DEFEATED"
+	overlay_sub.text = boss_data.display_name + " telah dikalahkan!"
+	btn_continue.visible = false
+	btn_stop.visible = true
+	btn_stop.text = "Selesai"
+	overlay.visible = true

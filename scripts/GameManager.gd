@@ -12,6 +12,9 @@ var corruption: int = 0
 # Gold
 var gold: int = 0
 
+var combat_mode: String = "normal"  # "normal" atau "boss"
+var boss_stage_effects: Array = []  # efek per stage boss
+
 func add_joker_to_collection(joker: JokerData) -> void:
 	collected_jokers.append(joker)
 
