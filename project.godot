@@ -11,9 +11,17 @@ config_version=5
 [application]
 
 config/name="the-jester-zero-hour"
-run/main_scene="uid://byfg3es3he7y"
+run/main_scene="uid://bqwxr0gijw3rs"
 config/features=PackedStringArray("4.6", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="uid://cnrhoahydt3pi"
+
+[autoload]
+
+GameManager="*uid://b0gjeggcpnxbu"
+
+[navigation]
+
+2d/icon="res://icon.svg"
 
 [physics]
 
