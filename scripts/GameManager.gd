@@ -15,6 +15,18 @@ var gold: int = 0
 var combat_mode: String = "normal"  # "normal" atau "boss"
 var boss_stage_effects: Array = []  # efek per stage boss
 
+func add_corruption(amount: int) -> void:
+	corruption = clamp(corruption + amount, 0, 100)
+
+func get_corruption_tier() -> String:
+	if corruption <= 39:
+		return "jester"
+	elif corruption <= 69:
+		return "grey"
+	else:
+		return "joker"
+
+
 func add_joker_to_collection(joker: JokerData) -> void:
 	collected_jokers.append(joker)
 
@@ -46,6 +58,3 @@ func get_joker_count() -> int:
 		if joker != null:
 			count += 1
 	return count
-
-func add_corruption(amount: int) -> void:
-	corruption = clamp(corruption + amount, 0, 100)

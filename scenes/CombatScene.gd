@@ -20,6 +20,10 @@ extends Node2D
 @onready var btn_slot2 = $UI/JokerPanel/Slot2Container/BtnSlot2
 @onready var btn_joker1 = $UI/JokerPanel/Slot1Container/BtnSlot1
 @onready var btn_joker2 = $UI/JokerPanel/Slot2Container/BtnSlot2
+@onready var narrative_panel = $UI/NarrativePanel
+@onready var narrative_text = $UI/NarrativePanel/VBoxContainer/NarrativeText
+@onready var btn_choice1 = $UI/NarrativePanel/VBoxContainer/BtnChoice1
+@onready var btn_choice2 = $UI/NarrativePanel/VBoxContainer/BtnChoice2
 
 var evaluator: HandEvaluator
 var selected_cards: Array[Card] = []
@@ -35,6 +39,9 @@ var is_boss_fight: bool = false
 var boss_data: BossData = null
 var current_boss_stage: int = 0
 var current_stage_effect: String = ""
+var narrative_phases: Array = []
+var current_narrative: NarrativePhase = null
+
 
 const HAND_NAMES = {
 	0: "High Card", 1: "Pair", 2: "Two Pair",
@@ -57,6 +64,10 @@ func _ready():
 	btn_play.disabled = true
 	btn_discard.disabled = true
 	overlay.visible = false
+	
+	btn_choice1.pressed.connect(_on_choice_pressed.bind(0))
+	btn_choice2.pressed.connect(_on_choice_pressed.bind(1))
+	narrative_panel.visible = false
 	
 	# Setup combat berdasarkan mode
 	if GameManager.combat_mode == "boss":
@@ -151,6 +162,10 @@ func _on_play_pressed():
 	_render_hand()
 	_update_buttons()
 	_update_joker_display()
+	
+	# Cek apakah ada narrative phase yang harus ditrigger
+	if is_boss_fight:
+		_check_narrative_trigger()
 
 	if current_score >= target_score:
 		_check_win()
@@ -227,6 +242,12 @@ func _show_overlay_lose():
 	selected_cards.clear()
 	for child in hand_container.get_children():
 		child.queue_free()
+	
+	# Corruption naik kalau kalah boss
+	if is_boss_fight:
+		GameManager.add_corruption(15)
+		print("[Corruption] Kalah boss +15 → total: ", GameManager.corruption)
+	
 	overlay_title.text = "GAME OVER"
 	overlay_sub.text = "Score: " + str(current_score) + " / " + str(target_score) + \
 		"\nKamu tidak mencapai target dalam " + str(max_hands) + " hands."
@@ -274,7 +295,6 @@ func _on_stop_pressed():
 	if is_boss_fight:
 		# Kalah boss atau selesai → balik ke world
 		GameManager.combat_mode = "normal"
-		get_tree().change_scene_to_file("res://scenes/WorldTest.tscn")
 	else:
 		if btn_stop.text == "Coba Lagi":
 			stage = 1
@@ -296,6 +316,7 @@ func _on_stop_pressed():
 			overlay.visible = false
 			hand_type_label.text = "Kamu berhenti di Stage " + str(stage) + \
 				" dengan score " + str(current_score)
+	get_tree().change_scene_to_file("res://scenes/WorldTest.tscn")
 
 func _update_joker_display():
 	for i in 2:
@@ -346,6 +367,16 @@ func setup_boss_combat(boss: BossData):
 	boss_data = boss
 	current_boss_stage = 0
 	_apply_boss_stage(0)
+	# Setup narrative phase untuk boss ini
+	narrative_phases = [
+		NarrativePhase.new(1, 2,
+			"Di tengah duel, musuhmu berhenti sejenak.\n\"Kau bisa menyerah sekarang. Tidak ada yang perlu terluka lebih jauh.\"\n\nApa yang kamu lakukan?",
+			[
+				NarrativePhase.Choice.new("\"Aku tidak akan menyerah.\" — Lanjutkan pertarungan.", -5),
+				NarrativePhase.Choice.new("Ragu sejenak. Mungkin ia benar... — Tapi tetap lanjut.", 10)
+			]
+		)
+	]
 
 func _apply_boss_stage(stage_index: int):
 	var stage = boss_data.stages[stage_index]
@@ -407,3 +438,52 @@ func _show_overlay_boss_defeated():
 	btn_stop.visible = true
 	btn_stop.text = "Selesai"
 	overlay.visible = true
+	
+
+func _check_narrative_trigger():
+	for phase in narrative_phases:
+		if phase.already_triggered:
+			continue
+		if phase.trigger_at_stage == current_boss_stage and \
+		   phase.trigger_at_hands <= hands_played:
+			_trigger_narrative(phase)
+			return
+
+func _trigger_narrative(phase: NarrativePhase):
+	phase.already_triggered = true
+	current_narrative = phase
+	
+	# Pause combat
+	btn_play.disabled = true
+	btn_discard.disabled = true
+	btn_joker1.disabled = true
+	btn_joker2.disabled = true
+	
+	narrative_text.text = phase.narrative_text
+	btn_choice1.text = phase.choices[0].text
+	btn_choice2.text = phase.choices[1].text
+	narrative_panel.visible = true
+
+func _on_choice_pressed(choice_index: int):
+	if current_narrative == null:
+		return
+	
+	var choice = current_narrative.choices[choice_index]
+	GameManager.add_corruption(choice.corruption_delta)
+	print("[Corruption] Pilihan narrative: ", choice.corruption_delta, \
+		" → total: ", GameManager.corruption, \
+		" (tier: ", GameManager.get_corruption_tier(), ")")
+	
+	current_narrative = null
+	narrative_panel.visible = false
+	
+	# Resume combat
+	btn_play.disabled = selected_cards.is_empty()
+	btn_discard.disabled = selected_cards.is_empty() or jp_manager.is_empty()
+	_update_joker_display()
+	
+	# Cek win/lose yang tertunda
+	if current_score >= target_score:
+		_check_win()
+	elif hands_played >= max_hands:
+		_show_overlay_lose()

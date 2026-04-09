@@ -149,6 +149,35 @@ layout_mode = 2
 [node name="BtnStop" type="Button" parent="UI/Overlay/VBoxContainer" unique_id=2134406367]
 layout_mode = 2
 
+[node name="NarrativePanel" type="PanelContainer" parent="UI" unique_id=293162718]
+visible = false
+custom_minimum_size = Vector2(500, 200)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -23.5
+offset_right = 20.0
+offset_bottom = 23.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/NarrativePanel" unique_id=1839819347]
+layout_mode = 2
+
+[node name="NarrativeText" type="Label" parent="UI/NarrativePanel/VBoxContainer" unique_id=2147452963]
+custom_minimum_size = Vector2(460, 80)
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="BtnChoice1" type="Button" parent="UI/NarrativePanel/VBoxContainer" unique_id=162391174]
+layout_mode = 2
+
+[node name="BtnChoice2" type="Button" parent="UI/NarrativePanel/VBoxContainer" unique_id=1720058798]
+layout_mode = 2
+
 [node name="Managers" type="Node" parent="." unique_id=95716239]
 
 [node name="DeckManager" type="Node" parent="Managers" unique_id=373892316]
