@@ -17,6 +17,8 @@ var boss_stage_effects: Array = []  # efek per stage boss
 
 func add_corruption(amount: int) -> void:
 	corruption = clamp(corruption + amount, 0, 100)
+	# Opsional: uncomment baris di bawah untuk sync lebih responsif
+	UICorruptionTint.force_sync()
 
 func get_corruption_tier() -> String:
 	if corruption <= 39:

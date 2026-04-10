@@ -47,8 +47,7 @@ const HAND_NAMES = {
 	0: "High Card", 1: "Pair", 2: "Two Pair",
 	3: "Three of a Kind", 4: "Straight", 5: "Flush",
 	6: "Full House", 7: "Four of a Kind",
-	8: "Straight Flush", 9: "Royal Flush"
-}
+	8: "Straight Flush", 9: "Royal Flush"}
 
 func _ready():
 	evaluator = HandEvaluator.new()
@@ -83,6 +82,19 @@ func _ready():
 	_update_ui()
 	_update_joker_display()
 	_deal_hand()
+	# ── CORRUPTION TINT REGISTRATION ──
+	# Accent nodes: warna utama yang berubah gold → deep red
+	UICorruptionTint.register(score_label,     "theme_override_colors/font_color")
+	UICorruptionTint.register(jp_label,        "theme_override_colors/font_color")
+	UICorruptionTint.register(slot1_name,      "theme_override_colors/font_color")
+	UICorruptionTint.register(slot2_name,      "theme_override_colors/font_color")
+ 
+	# Muted nodes: warna sekunder (lebih gelap, berubah lebih subtil)
+	UICorruptionTint.register(hand_type_label, "theme_override_colors/font_color", true)
+	UICorruptionTint.register(target_label,    "theme_override_colors/font_color", true)
+ 
+	# Force sync agar warna langsung sesuai corruption saat scene dibuka
+	UICorruptionTint.force_sync()
 
 func _deal_hand():
 	deck_manager.deal_hand()
@@ -233,6 +245,9 @@ func _show_overlay_win():
 	btn_stop.visible = true
 	btn_stop.text = "Selesai"
 	overlay.visible = true
+	UICorruptionTint.register(overlay_title, "theme_override_colors/font_color")
+	UICorruptionTint.register(overlay_sub,   "theme_override_colors/font_color", true)
+ 
 
 func _show_overlay_lose():
 	btn_play.disabled = true
@@ -255,6 +270,9 @@ func _show_overlay_lose():
 	btn_stop.visible = true
 	btn_stop.text = "Coba Lagi"
 	overlay.visible = true
+	UICorruptionTint.register(overlay_title, "theme_override_colors/font_color")
+	UICorruptionTint.register(overlay_sub,   "theme_override_colors/font_color", true)
+ 
 
 func _on_continue_pressed():
 	if is_boss_fight:
@@ -462,6 +480,14 @@ func _trigger_narrative(phase: NarrativePhase):
 	narrative_text.text = phase.narrative_text
 	btn_choice1.text = phase.choices[0].text
 	btn_choice2.text = phase.choices[1].text
+	narrative_panel.visible = true
+	
+	# Tint teks naratif
+	UICorruptionTint.register(narrative_text, "theme_override_colors/font_color", true)
+ 
+	narrative_text.text  = phase.narrative_text
+	btn_choice1.text     = phase.choices[0].text
+	btn_choice2.text     = phase.choices[1].text
 	narrative_panel.visible = true
 
 func _on_choice_pressed(choice_index: int):
