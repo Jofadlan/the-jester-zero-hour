@@ -81,3 +81,16 @@ static func create_none() -> JokerData:
 	j.display_name = "None"
 	j.description = "???"  # Tetap hidden bahkan setelah revealed — ironi disengaja
 	return j
+
+static func create_by_type(type: JokerData.JokerType) -> JokerData:
+	match type:
+		JokerData.JokerType.THE_INVISIBLE_SEMUT: return create_invisible_semut()
+		JokerData.JokerType.HIDDEN_SINEW:        return create_hidden_sinew()
+		JokerData.JokerType.TACTICIANS_SATIRE:   return create_tacticians_satire()
+		JokerData.JokerType.THE_LATE_ARRIVAL:    return create_late_arrival()
+		JokerData.JokerType.NIGHTLY_PROWESS:     return create_nightly_prowess()
+		JokerData.JokerType.SHADOW_MENTOR:       return create_shadow_mentor()
+		JokerData.JokerType.THE_OILY_TORCH:      return create_oily_torch()
+		JokerData.JokerType.VAIN_PRESERVATION:   return create_vain_preservation()
+		JokerData.JokerType.NONE:                return create_none()
+		_: return null
