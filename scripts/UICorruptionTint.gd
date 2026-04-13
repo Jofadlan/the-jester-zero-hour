@@ -131,15 +131,17 @@ func _recalculate_colors() -> void:
 		current_muted  = COLOR_MUTED_JESTER.lerp(COLOR_MUTED_JOKER, 0.6 + local_t * 0.4)
 
 func _apply_to_registered() -> void:
+	_registered_nodes = _registered_nodes.filter(func(e): return is_instance_valid(e[0]))
+	
 	for entry in _registered_nodes:
 		var node: Node = entry[0]
 		var prop: String = entry[1]
 		var use_muted: bool = entry[2]
+		var target_color := current_muted if use_muted else current_accent
+		node.set(prop, target_color)
 		
 		if not is_instance_valid(node):
 			continue
-		
-		var target_color := current_muted if use_muted else current_accent
 		
 		# Gunakan set() untuk theme_override agar kompatibel dengan semua Control node
 		if node.has_method("set"):

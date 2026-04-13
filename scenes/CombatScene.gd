@@ -32,9 +32,16 @@ var target_score: int = 300
 var hands_played: int = 0
 var max_hands: int = 4
 var stage: int = 1
+
+#joker
 var nightly_prowess_active: bool = false
 var oily_torch_used: bool = false
 var oily_torch_pending: bool = false
+var invisible_semut_active: bool = false
+var hidden_sinew_active: bool = false
+var late_arrival_active: bool = false
+
+#boss 
 var is_boss_fight: bool = false
 var boss_data: BossData = null
 var current_boss_stage: int = 0
@@ -141,6 +148,29 @@ func _on_play_pressed():
 		nightly_prowess_active = false
 		hand_type_label.text = "✦ Upgraded! +" + str(score) + " pts"
 	
+	if hidden_sinew_active:
+		var low_card_bonus = 0
+		for card in selected_cards:
+			if card.rank <= Card.Rank.FIVE:
+				low_card_bonus += 15
+		score += low_card_bonus
+		hidden_sinew_active = false
+
+	if late_arrival_active:
+	# Skip hand ini — tidak mengurangi hands_played
+		late_arrival_active = false
+		hand_type_label.text = "✦ Late Arrival — hand ini tidak dihitung."
+		for card in selected_cards:
+			deck_manager.hand.erase(card)
+			deck_manager.discard_pile.append(card)
+			if not deck_manager.draw_pile.is_empty():
+				deck_manager.hand.append(deck_manager.draw_pile.pop_back())
+		selected_cards.clear()
+		_render_hand()
+		_update_buttons()
+		_update_joker_display()
+		return  # Early return — tidak tambah hands_played
+	
 	if oily_torch_used:
 		score *= 2
 		oily_torch_pending = true
@@ -218,7 +248,6 @@ func _on_discard_pressed():
 	_render_hand()
 	_update_buttons()
 
-
 func _on_jp_changed(current: int, maximum: int):
 	jp_label.text = "JP: " + str(current) + "/" + str(maximum)
 
@@ -248,7 +277,6 @@ func _show_overlay_win():
 	UICorruptionTint.register(overlay_title, "theme_override_colors/font_color")
 	UICorruptionTint.register(overlay_sub,   "theme_override_colors/font_color", true)
  
-
 func _show_overlay_lose():
 	btn_play.disabled = true
 	btn_discard.disabled = true
@@ -273,7 +301,6 @@ func _show_overlay_lose():
 	UICorruptionTint.register(overlay_title, "theme_override_colors/font_color")
 	UICorruptionTint.register(overlay_sub,   "theme_override_colors/font_color", true)
  
-
 func _on_continue_pressed():
 	if is_boss_fight:
 		if oily_torch_pending:
@@ -351,6 +378,7 @@ func _update_joker_display():
 			name_label.text = "[kosong]"
 			btn.disabled = true
 			btn.text = "—"
+
 func activate_joker(slot_index: int) -> bool:
 	var joker = GameManager.joker_slots[slot_index]
 	if joker == null:
@@ -365,15 +393,46 @@ func activate_joker(slot_index: int) -> bool:
 		JokerData.JokerType.NIGHTLY_PROWESS:
 			nightly_prowess_active = true
 			hand_type_label.text = "✦ Nightly Prowess aktif!"
+		
 		JokerData.JokerType.THE_OILY_TORCH:
 			oily_torch_used = true
 			hand_type_label.text = "✦ The Oily Torch aktif!"
+		
+		JokerData.JokerType.THE_INVISIBLE_SEMUT:
+			invisible_semut_active = true
+			hand_type_label.text = "✦ The Invisible Semut aktif!"
+		
+		JokerData.JokerType.HIDDEN_SINEW:
+			hidden_sinew_active = true
+			hand_type_label.text = "✦ Hidden Sinew aktif!"
+		
+		JokerData.JokerType.TACTICIANS_SATIRE:
+			_reveal_next_stage_target()
+			hand_type_label.text = "✦ Tactician's Satire — target stage berikutnya terungkap."
+		
+		JokerData.JokerType.THE_LATE_ARRIVAL:
+			late_arrival_active = true
+			hand_type_label.text = "✦ The Late Arrival aktif — skip hand berikutnya aman."
+		
+		JokerData.JokerType.SHADOW_MENTOR:
+			_show_top_deck_preview()
+			hand_type_label.text = "✦ Shadow Mentor — 3 kartu teratas deck terungkap."
+		
+		JokerData.JokerType.VAIN_PRESERVATION:
+			GameManager.add_corruption(8)
+			hand_type_label.text = "✦ Vain Preservation aktif."
+			# Tidak ada feedback corruption — diam-diam
+		
+		JokerData.JokerType.NONE:
+			hand_type_label.text = "..."
+			# Tidak ada efek. Sengaja.
 	
 	return true
+
 func _on_joker_slot_pressed(slot_index: int):
 	if activate_joker(slot_index):
 		_update_joker_display()
-		
+
 func setup_normal_combat():
 	is_boss_fight = false
 	target_score = 300
@@ -456,7 +515,6 @@ func _show_overlay_boss_defeated():
 	btn_stop.visible = true
 	btn_stop.text = "Selesai"
 	overlay.visible = true
-	
 
 func _check_narrative_trigger():
 	for phase in narrative_phases:
@@ -513,3 +571,27 @@ func _on_choice_pressed(choice_index: int):
 		_check_win()
 	elif hands_played >= max_hands:
 		_show_overlay_lose()
+
+func _reveal_next_stage_target() -> void:
+	var next_target: int
+	if is_boss_fight:
+		var next_stage_idx = current_boss_stage + 1
+		if next_stage_idx < boss_data.stages.size():
+			next_target = boss_data.stages[next_stage_idx].target_score
+			hand_type_label.text = "Stage berikutnya: target " + str(next_target)
+		else:
+			hand_type_label.text = "Ini stage terakhir."
+	else:
+		next_target = int(target_score * 1.33)
+		if oily_torch_pending:
+			next_target = int(next_target * 2)
+		hand_type_label.text = "Stage berikutnya: target ~" + str(next_target)
+
+func _show_top_deck_preview() -> void:
+	var preview = deck_manager.draw_pile.slice(
+		max(0, deck_manager.draw_pile.size() - 3),
+		deck_manager.draw_pile.size()
+	)
+	var names = preview.map(func(c): return c.get_display_name())
+	names.reverse()  # top of deck duluan
+	hand_type_label.text = "Deck: " + ", ".join(names) + "..."
