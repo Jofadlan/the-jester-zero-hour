@@ -7,36 +7,97 @@ script = ExtResource("1_plmju")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=2106339218]
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UI" unique_id=1878055544]
+[node name="ScrollContainer" type="ScrollContainer" parent="UI" unique_id=1001000001]
 offset_left = 20.0
 offset_top = 20.0
-offset_right = 201.0
-offset_bottom = 218.0
-theme_override_constants/separation = 12
+offset_right = 420.0
+offset_bottom = 580.0
 
-[node name="LabelInfo" type="Label" parent="UI/VBoxContainer" unique_id=1303688821]
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/ScrollContainer" unique_id=1878055544]
+custom_minimum_size = Vector2(380, 0)
+theme_override_constants/separation = 10
+
+[node name="LabelInfo" type="Label" parent="UI/ScrollContainer/VBoxContainer" unique_id=1303688821]
+custom_minimum_size = Vector2(360, 80)
 layout_mode = 2
+autowrap_mode = 3
 
-[node name="BtnPickNightly" type="Button" parent="UI/VBoxContainer" unique_id=1465928531]
+[node name="LabelSection1" type="Label" parent="UI/ScrollContainer/VBoxContainer" unique_id=1001000010]
 layout_mode = 2
-text = "Ambil Nightly Prowess"
+theme_override_colors/font_color = Color(0.788, 0.573, 0.165, 1)
+text = "── BUFF JOKERS ──"
 
-[node name="BtnPickOily" type="Button" parent="UI/VBoxContainer" unique_id=1371706037]
+[node name="BtnPickInvisibleSemut" type="Button" parent="UI/ScrollContainer/VBoxContainer" unique_id=1001000011]
 layout_mode = 2
-text = "Ambil The Oily Torch"
+text = "Ambil The Invisible Semut (Ruang Alkemis)"
 
-[node name="BtnSlot1" type="Button" parent="UI/VBoxContainer" unique_id=1831868545]
+[node name="BtnPickHiddenSinew" type="Button" parent="UI/ScrollContainer/VBoxContainer" unique_id=1001000012]
+layout_mode = 2
+text = "Ambil Hidden Sinew (Gudang Senjata)"
+
+[node name="BtnPickTacticiansSatire" type="Button" parent="UI/ScrollContainer/VBoxContainer" unique_id=1001000013]
+layout_mode = 2
+text = "Ambil Tactician's Satire (Ruang Alkemis)"
+
+[node name="BtnPickLateArrival" type="Button" parent="UI/ScrollContainer/VBoxContainer" unique_id=1001000014]
+layout_mode = 2
+text = "Ambil The Late Arrival (Pasar Kota)"
+
+[node name="BtnPickNightly" type="Button" parent="UI/ScrollContainer/VBoxContainer" unique_id=1465928531]
+layout_mode = 2
+text = "Ambil Nightly Prowess (Halaman Belakang)"
+
+[node name="BtnPickShadowMentor" type="Button" parent="UI/ScrollContainer/VBoxContainer" unique_id=1001000015]
+layout_mode = 2
+text = "Ambil Shadow Mentor (Perpustakaan)"
+
+[node name="LabelSection2" type="Label" parent="UI/ScrollContainer/VBoxContainer" unique_id=1001000020]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.698, 0.314, 0.122, 1)
+text = "── DEBUFF JOKERS ──"
+
+[node name="BtnPickOily" type="Button" parent="UI/ScrollContainer/VBoxContainer" unique_id=1371706037]
+layout_mode = 2
+text = "Ambil The Oily Torch (Desa Perbatasan)"
+
+[node name="BtnPickVainPreservation" type="Button" parent="UI/ScrollContainer/VBoxContainer" unique_id=1001000016]
+layout_mode = 2
+text = "Ambil Vain Preservation (Desa Perbatasan)"
+
+[node name="LabelSection3" type="Label" parent="UI/ScrollContainer/VBoxContainer" unique_id=1001000030]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.478, 0.431, 0.369, 1)
+text = "── NEUTRAL ──"
+
+[node name="BtnPickNone" type="Button" parent="UI/ScrollContainer/VBoxContainer" unique_id=1001000017]
+layout_mode = 2
+text = "Ambil None (Tempat Judi — hanya untuk test)"
+
+[node name="LabelSection4" type="Label" parent="UI/ScrollContainer/VBoxContainer" unique_id=1001000040]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.788, 0.573, 0.165, 1)
+text = "── EQUIP & COMBAT ──"
+
+[node name="BtnSlot1" type="Button" parent="UI/ScrollContainer/VBoxContainer" unique_id=1831868545]
 layout_mode = 2
 text = "Equip ke Slot 1"
 
-[node name="BtnSlot2" type="Button" parent="UI/VBoxContainer" unique_id=806636050]
+[node name="BtnSlot2" type="Button" parent="UI/ScrollContainer/VBoxContainer" unique_id=806636050]
 layout_mode = 2
 text = "Equip ke Slot 2"
 
-[node name="BtnGoCombat" type="Button" parent="UI/VBoxContainer" unique_id=617361786]
+[node name="BtnUnequipSlot1" type="Button" parent="UI/ScrollContainer/VBoxContainer" unique_id=1001000050]
+layout_mode = 2
+text = "Unequip Slot 1 (buang permanen)"
+
+[node name="BtnUnequipSlot2" type="Button" parent="UI/ScrollContainer/VBoxContainer" unique_id=1001000051]
+layout_mode = 2
+text = "Unequip Slot 2 (buang permanen)"
+
+[node name="BtnGoCombat" type="Button" parent="UI/ScrollContainer/VBoxContainer" unique_id=617361786]
 layout_mode = 2
 text = "Masuk Combat"
 
-[node name="BtnGoBoss" type="Button" parent="UI/VBoxContainer" unique_id=1115765210]
+[node name="BtnGoBoss" type="Button" parent="UI/ScrollContainer/VBoxContainer" unique_id=1115765210]
 layout_mode = 2
 text = "Lawan Boss (Test)"
