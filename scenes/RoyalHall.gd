@@ -145,3 +145,7 @@ func _apply_npc_mood():
 			btn_magician.modulate  = Color(0.70, 0.60, 0.60)
 			btn_emperor.modulate   = Color(0.70, 0.60, 0.60)
 			btn_priestess.modulate = Color(0.55, 0.50, 0.50)
+
+func _on_go_boss():
+	GameManager.combat_mode = "boss"
+	get_tree().change_scene_to_file("res://scenes/CombatScene.tscn")

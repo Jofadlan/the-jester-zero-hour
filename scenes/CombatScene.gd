@@ -77,11 +77,7 @@ func _ready():
 	
 	# Setup combat berdasarkan mode
 	if GameManager.combat_mode == "boss":
-		var boss = BossData.new("THE LOVERS", [
-			BossData.StageData.new(300),
-			BossData.StageData.new(500, "discard_random_2")
-		])
-		setup_boss_combat(boss)
+		setup_boss_combat(BossLovers.create())
 	else:
 		setup_normal_combat()
 		jp_manager.reset_for_duel(GameManager.get_joker_count())
@@ -337,31 +333,8 @@ func _on_continue_pressed():
 		_deal_hand()
 
 func _on_stop_pressed():
-	if is_boss_fight:
-		# Kalah boss atau selesai → balik ke world
-		GameManager.combat_mode = "normal"
-	else:
-		if btn_stop.text == "Coba Lagi":
-			stage = 1
-			target_score = 300
-			current_score = 0
-			hands_played = 0
-			nightly_prowess_active = false
-			oily_torch_pending = false
-			jp_manager.reset_for_duel(GameManager.get_joker_count())
-			deck_manager.shuffle_deck()
-			overlay.visible = false
-			btn_discard.disabled = false
-			btn_joker1.disabled = false
-			btn_joker2.disabled = false
-			_update_ui()
-			_update_joker_display()
-			_deal_hand()
-		else:
-			overlay.visible = false
-			hand_type_label.text = "Kamu berhenti di Stage " + str(stage) + \
-				" dengan score " + str(current_score)
-	get_tree().change_scene_to_file("res://scenes/WorldTest.tscn")
+	GameManager.combat_mode = "normal"
+	get_tree().change_scene_to_file("res://scenes/RoyalHall.tscn")
 
 func _update_joker_display():
 	for i in 2:
@@ -444,16 +417,7 @@ func setup_boss_combat(boss: BossData):
 	boss_data = boss
 	current_boss_stage = 0
 	_apply_boss_stage(0)
-	# Setup narrative phase untuk boss ini
-	narrative_phases = [
-		NarrativePhase.new(1, 2,
-			"Di tengah duel, musuhmu berhenti sejenak.\n\"Kau bisa menyerah sekarang. Tidak ada yang perlu terluka lebih jauh.\"\n\nApa yang kamu lakukan?",
-			[
-				NarrativePhase.Choice.new("\"Aku tidak akan menyerah.\" — Lanjutkan pertarungan.", -5),
-				NarrativePhase.Choice.new("Ragu sejenak. Mungkin ia benar... — Tapi tetap lanjut.", 10)
-			]
-		)
-	]
+	narrative_phases = BossLovers.create_narrative_phases()
 
 func _apply_boss_stage(stage_index: int):
 	var stage = boss_data.stages[stage_index]

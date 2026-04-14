@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bwhs64qsepxkd"]
 
-[ext_resource type="Script" path="res://scenes/RoyalHall.gd" id="1_rhall"]
+[ext_resource type="Script" uid="uid://be3lebkii7air" path="res://scenes/RoyalHall.gd" id="1_rhall"]
 
 [node name="RoyalHall" type="Node2D" unique_id=1000000001]
 script = ExtResource("1_rhall")
