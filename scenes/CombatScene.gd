@@ -204,6 +204,8 @@ func _on_play_pressed():
 	# Cek apakah ada narrative phase yang harus ditrigger
 	if is_boss_fight:
 		_check_narrative_trigger()
+		if narrative_panel.visible:
+			return
 
 	if current_score >= target_score:
 		_check_win()

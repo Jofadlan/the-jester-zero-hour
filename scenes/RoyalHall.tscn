@@ -19,9 +19,9 @@ text = "Aula Kerajaan"
 [node name="NPCButtons" type="VBoxContainer" parent="UI" unique_id=1000000004]
 offset_left = 20.0
 offset_top = 60.0
-offset_right = 340.0
-offset_bottom = 260.0
-theme_override_constants/separation = 12
+offset_right = 380.0
+offset_bottom = 320.0
+theme_override_constants/separation = 10
 
 [node name="BtnMagician" type="Button" parent="UI/NPCButtons" unique_id=1000000005]
 layout_mode = 2
@@ -35,40 +35,102 @@ text = "Menghadap Raja  [The Emperor]"
 layout_mode = 2
 text = "Dekati Sang Peramal Bisu  [The High Priestess]"
 
-[node name="BtnGoCombat" type="Button" parent="UI/NPCButtons" unique_id=1000000008]
+[node name="BtnJokerMenu" type="Button" parent="UI/NPCButtons" unique_id=1000000008]
 layout_mode = 2
-text = "── Latihan Malam (Masuk Combat) ──"
+text = "── Kelola Joker ──"
 
-[node name="DialogueBox" type="PanelContainer" parent="UI" unique_id=1000000010]
+[node name="BtnGoCombat" type="Button" parent="UI/NPCButtons" unique_id=1000000009]
+layout_mode = 2
+text = "Latihan Malam (Combat Normal)"
+
+[node name="BtnGoBoss" type="Button" parent="UI/NPCButtons" unique_id=1000000010]
+layout_mode = 2
+text = "Hadapi The Lovers (Boss Fight)"
+
+[node name="DialogueBox" type="PanelContainer" parent="UI" unique_id=1000000020]
 visible = false
 offset_left = 20.0
 offset_top = 440.0
-offset_right = 620.0
+offset_right = 640.0
 offset_bottom = 600.0
 
-[node name="VBox" type="VBoxContainer" parent="UI/DialogueBox" unique_id=1000000011]
+[node name="VBox" type="VBoxContainer" parent="UI/DialogueBox" unique_id=1000000021]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="LabelSpeaker" type="Label" parent="UI/DialogueBox/VBox" unique_id=1000000012]
+[node name="LabelSpeaker" type="Label" parent="UI/DialogueBox/VBox" unique_id=1000000022]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.788, 0.573, 0.165, 1)
 theme_override_font_sizes/font_size = 14
 text = "Speaker"
 
-[node name="LabelText" type="Label" parent="UI/DialogueBox/VBox" unique_id=1000000013]
-custom_minimum_size = Vector2(560, 60)
+[node name="LabelText" type="Label" parent="UI/DialogueBox/VBox" unique_id=1000000023]
+custom_minimum_size = Vector2(580, 60)
 layout_mode = 2
 text = "..."
 autowrap_mode = 3
 
-[node name="HBox" type="HBoxContainer" parent="UI/DialogueBox/VBox" unique_id=1000000020]
+[node name="HBox" type="HBoxContainer" parent="UI/DialogueBox/VBox" unique_id=1000000024]
 layout_mode = 2
 
-[node name="BtnNext" type="Button" parent="UI/DialogueBox/VBox/HBox" unique_id=1000000014]
+[node name="BtnNext" type="Button" parent="UI/DialogueBox/VBox/HBox" unique_id=1000000025]
 layout_mode = 2
 text = "Lanjut ▶"
 
-[node name="BtnClose" type="Button" parent="UI/DialogueBox/VBox/HBox" unique_id=1000000015]
+[node name="BtnClose" type="Button" parent="UI/DialogueBox/VBox/HBox" unique_id=1000000026]
+layout_mode = 2
+text = "Tutup ✕"
+
+[node name="JokerPanel" type="PanelContainer" parent="UI" unique_id=1000000030]
+visible = false
+offset_left = 400.0
+offset_top = 20.0
+offset_right = 760.0
+offset_bottom = 400.0
+
+[node name="VBox" type="VBoxContainer" parent="UI/JokerPanel" unique_id=1000000031]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LabelSlots" type="Label" parent="UI/JokerPanel/VBox" unique_id=1000000032]
+custom_minimum_size = Vector2(340, 140)
+layout_mode = 2
+text = "..."
+autowrap_mode = 3
+
+[node name="HBoxPick" type="HBoxContainer" parent="UI/JokerPanel/VBox" unique_id=1000000033]
+layout_mode = 2
+
+[node name="BtnPickJ1" type="Button" parent="UI/JokerPanel/VBox/HBoxPick" unique_id=1000000034]
+layout_mode = 2
+text = "◀ Prev"
+
+[node name="BtnPickJ2" type="Button" parent="UI/JokerPanel/VBox/HBoxPick" unique_id=1000000035]
+layout_mode = 2
+text = "Next ▶"
+
+[node name="HBoxEquip" type="HBoxContainer" parent="UI/JokerPanel/VBox" unique_id=1000000036]
+layout_mode = 2
+
+[node name="BtnEquip1" type="Button" parent="UI/JokerPanel/VBox/HBoxEquip" unique_id=1000000037]
+layout_mode = 2
+text = "Equip Slot 1"
+
+[node name="BtnEquip2" type="Button" parent="UI/JokerPanel/VBox/HBoxEquip" unique_id=1000000038]
+layout_mode = 2
+text = "Equip Slot 2"
+
+[node name="HBoxUnequip" type="HBoxContainer" parent="UI/JokerPanel/VBox" unique_id=1000000039]
+layout_mode = 2
+
+[node name="BtnUnequip1" type="Button" parent="UI/JokerPanel/VBox/HBoxUnequip" unique_id=1000000040]
+layout_mode = 2
+text = "Buang Slot 1"
+
+[node name="BtnUnequip2" type="Button" parent="UI/JokerPanel/VBox/HBoxUnequip" unique_id=1000000041]
+layout_mode = 2
+text = "Buang Slot 2"
+
+[node name="BtnCloseJoker" type="Button" parent="UI/JokerPanel/VBox" unique_id=1000000042]
 layout_mode = 2
 text = "Tutup ✕"
