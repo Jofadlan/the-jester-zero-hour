@@ -43,3 +43,8 @@ static func get_card_region(card: Card) -> Rect2:
 static func get_back_region(joker_back: bool = false) -> Rect2:
 	var row = ROW_BACK_BLUE if joker_back else ROW_BACK_WHITE
 	return Rect2(COL_BACK_WHITE * CARD_WIDTH, row * CARD_HEIGHT, CARD_WIDTH, CARD_HEIGHT)
+
+static func get_joker_region(variant: int = 0) -> Rect2:
+	# variant 0 = baris 2, variant 1 = baris 3
+	var row = 2 + variant
+	return Rect2(13 * CARD_WIDTH, row * CARD_HEIGHT, CARD_WIDTH, CARD_HEIGHT)

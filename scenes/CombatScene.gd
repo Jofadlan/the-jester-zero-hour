@@ -350,10 +350,30 @@ func _update_joker_display():
 		var joker = GameManager.joker_slots[i]
 		var name_label = slot1_name if i == 0 else slot2_name
 		var btn = btn_slot1 if i == 0 else btn_slot2
-		
+		var container = btn_slot1.get_parent() if i == 0 else btn_slot2.get_parent()
+
+		# Hapus TextureRect lama kalau ada
+		for child in container.get_children():
+			if child is TextureRect:
+				child.queue_free()
+
 		if joker:
-			name_label.text = joker.display_name + "\n" + \
-				joker.get_description() + "\n(Cost: " + str(joker.jp_cost) + " JP)"
+			var atlas = AtlasTexture.new()
+			atlas.atlas = card_sheet
+			atlas.region = CardVisual.get_joker_region(i)
+			atlas.filter_clip = true
+
+			var tex = TextureRect.new()
+			tex.texture = atlas
+			tex.custom_minimum_size = Vector2(38, 38)
+			tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			tex.tooltip_text = joker.get_description() + "\nCost: " + str(joker.jp_cost) + " JP"
+			tex.mouse_filter = Control.MOUSE_FILTER_STOP
+			container.add_child(tex)
+			container.move_child(tex, 0)
+
+			# Label hanya tampilkan nama
+			name_label.text = joker.display_name
 			btn.disabled = not jp_manager.can_use_joker(joker.jp_cost)
 			btn.text = "Aktifkan"
 		else:
