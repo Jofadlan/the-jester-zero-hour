@@ -60,7 +60,7 @@ func _ready():
 	btn_equip2.pressed.connect(_equip.bind(1))
 	btn_unequip1.pressed.connect(_unequip.bind(0))
 	btn_unequip2.pressed.connect(_unequip.bind(1))
-	btn_close_joker.pressed.connect(func(): joker_panel.hide())
+	btn_close_joker.pressed.connect(_close)
 
 	_apply_npc_mood()
 
@@ -125,6 +125,8 @@ func _update_joker_panel():
 		text += "Slot %d: %s\n" % [i + 1, slot.display_name if slot else "[kosong]"]
 	label_slots.text = text
 
+func _close():
+	joker_panel.visible = false
 # ── NPC DIALOGUE ──────────────────────────────────
 
 func _talk_magician():
