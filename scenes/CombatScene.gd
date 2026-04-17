@@ -24,6 +24,7 @@ extends Node2D
 @onready var narrative_text = $UI/NarrativePanel/VBoxContainer/NarrativeText
 @onready var btn_choice1 = $UI/NarrativePanel/VBoxContainer/BtnChoice1
 @onready var btn_choice2 = $UI/NarrativePanel/VBoxContainer/BtnChoice2
+@export var card_sheet: Texture2D
 
 var evaluator: HandEvaluator
 var selected_cards: Array[Card] = []
@@ -110,11 +111,18 @@ func _render_hand():
 		child.queue_free()
 	for card in deck_manager.hand:
 		var btn = Button.new()
-		btn.text = card.get_display_name()
-		btn.custom_minimum_size = Vector2(60, 90)
+		btn.custom_minimum_size = Vector2(64, 80)
+		btn.text = ""
+
+		var sprite = Sprite2D.new()
+		sprite.texture = card_sheet
+		sprite.region_enabled = true
+		sprite.region_rect = CardVisual.get_card_region(card)
+		sprite.position = Vector2(32, 40)  # center dalam button
+		btn.add_child(sprite)
+
 		btn.pressed.connect(_on_card_pressed.bind(card, btn))
 		hand_container.add_child(btn)
-
 func _on_card_pressed(card: Card, btn: Button):
 	if card in selected_cards:
 		selected_cards.erase(card)
