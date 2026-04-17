@@ -180,21 +180,24 @@ func _on_play_pressed():
 			"  +  " + str(score) + " pts"
 	
 	# Ganti kartu yang dimainkan
+	# Erase kartu yang dimainkan dari hand
 	for card in selected_cards:
 		deck_manager.hand.erase(card)
 		deck_manager.discard_pile.append(card)
-		if not deck_manager.draw_pile.is_empty():
-			deck_manager.hand.append(deck_manager.draw_pile.pop_back())
-		elif not deck_manager.discard_pile.is_empty():
-			deck_manager.refill_from_discard()
-			if not deck_manager.draw_pile.is_empty():
-				deck_manager.hand.append(deck_manager.draw_pile.pop_back())
-	
-	selected_cards.clear()
-	
-	# Efek boss stage — discard 2 kartu random
+
+	# Efek boss stage — buang sisa hand yang tidak dimainkan
 	if current_stage_effect == "discard_random_2":
 		_apply_discard_random(2)
+
+	selected_cards.clear()
+
+# Refill hand setelah semua discard selesai
+	while deck_manager.hand.size() < DeckManager.HAND_SIZE:
+		if deck_manager.draw_pile.is_empty():
+			if deck_manager.discard_pile.is_empty():
+				break
+			deck_manager.refill_from_discard()
+		deck_manager.hand.append(deck_manager.draw_pile.pop_back())
 	
 	_update_ui()
 	_render_hand()
@@ -216,20 +219,16 @@ func _on_play_pressed():
 		return
 
 func _apply_discard_random(amount: int):
+	if deck_manager.hand.is_empty():
+		return
 	var available = deck_manager.hand.duplicate()
 	available.shuffle()
-	var to_discard = available.slice(0, min(amount, available.size()))
-	for card in to_discard:
+	var count = min(amount, available.size())
+	for i in count:
+		var card = available[i]
 		deck_manager.hand.erase(card)
 		deck_manager.discard_pile.append(card)
-		# Langsung ganti dengan kartu baru dari draw pile
-		if not deck_manager.draw_pile.is_empty():
-			deck_manager.hand.append(deck_manager.draw_pile.pop_back())
-		elif not deck_manager.discard_pile.is_empty():
-			deck_manager.refill_from_discard()
-			if not deck_manager.draw_pile.is_empty():
-				deck_manager.hand.append(deck_manager.draw_pile.pop_back())
-	hand_type_label.text += "\n⚠ " + str(to_discard.size()) + " kartu dibuang paksa!"
+	hand_type_label.text += "\n⚠ " + str(count) + " kartu dibuang paksa!"
 
 func _on_discard_pressed():
 	if selected_cards.is_empty():
@@ -413,6 +412,7 @@ func setup_normal_combat():
 	target_score = 300
 	max_hands = 4
 	current_stage_effect = ""
+	narrative_phases = []
 
 func setup_boss_combat(boss: BossData):
 	is_boss_fight = true
@@ -422,6 +422,7 @@ func setup_boss_combat(boss: BossData):
 	narrative_phases = BossLovers.create_narrative_phases()
 
 func _apply_boss_stage(stage_index: int):
+	@warning_ignore("shadowed_variable")
 	var stage = boss_data.stages[stage_index]
 	target_score = stage.target_score
 	current_stage_effect = stage.effect

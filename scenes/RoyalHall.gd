@@ -22,7 +22,7 @@ extends Node2D
 @onready var btn_equip2     : Button  = $UI/JokerPanel/VBox/HBoxEquip/BtnEquip2
 @onready var btn_unequip1   : Button  = $UI/JokerPanel/VBox/HBoxUnequip/BtnUnequip1
 @onready var btn_unequip2   : Button  = $UI/JokerPanel/VBox/HBoxUnequip/BtnUnequip2
-@onready var btn_close_joker: Button  = $UI/DialogueBox/VBox/HBox/BtnClose
+@onready var btn_close_joker: Button = $UI/JokerPanel/VBox/BtnCloseJoker
 
 var _dialogue_queue  : Array[String] = []
 var _current_speaker : String        = ""

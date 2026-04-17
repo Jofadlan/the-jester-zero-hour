@@ -68,6 +68,7 @@ func _on_unequip_slot(slot: int):
 	if joker == null:
 		_show_feedback("✗ Slot " + str(slot + 1) + " kosong.", false)
 		return
+	@warning_ignore("shadowed_variable_base_class")
 	var name = joker.display_name
 	GameManager.unequip_joker(slot)
 	_show_feedback("✦ " + name + " dibuang dari Slot " + str(slot + 1) + " (permanen).", true)
