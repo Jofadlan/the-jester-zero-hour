@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://cos67ero3xutn"]
+
+[ext_resource type="Script" uid="uid://dw4610qhfuehq" path="res://scripts/NPC.gd" id="1_mhefn"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6xvi5"]
+size = Vector2(120, 80)
+
+[node name="NPC" type="Node2D" unique_id=1972280163]
+script = ExtResource("1_mhefn")
+
+[node name="Sprite" type="ColorRect" parent="." unique_id=1677326495]
+offset_right = 32.0
+offset_bottom = 64.0
+
+[node name="Label" type="Label" parent="." unique_id=1620774941]
+offset_top = -20.0
+offset_right = 40.0
+offset_bottom = 3.0
+
+[node name="Indicator" type="Label" parent="." unique_id=858233469]
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = -17.0
+text = "[E]"
+
+[node name="InteractionZone" type="Area2D" parent="." unique_id=1442023858]
+collision_layer = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionZone" unique_id=390911068]
+shape = SubResource("RectangleShape2D_6xvi5")

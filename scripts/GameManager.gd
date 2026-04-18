@@ -116,3 +116,8 @@ func has_undiscovered_joker(area_id: String) -> bool:
 			if not state["found"] and not state["gone"]:
 				return true
 	return false
+
+var tutorial_done: bool = false
+
+func complete_tutorial():
+	tutorial_done = true

@@ -1,58 +1,58 @@
-[gd_scene format=3 uid="uid://bwhs64qsepxkd"]
+[gd_scene format=3 uid="uid://d2bvkya5fv7h"]
 
-[ext_resource type="Script" uid="uid://be3lebkii7air" path="res://scenes/RoyalHall.gd" id="1_rhall"]
+[ext_resource type="Script" uid="uid://cn7p74dsib2ig" path="res://scenes/RoyalHall.gd" id="1_rhall"]
+[ext_resource type="PackedScene" uid="uid://dkyhw6w2ccbdr" path="res://scenes/Player.tscn" id="2_jtryb"]
+[ext_resource type="PackedScene" uid="uid://cos67ero3xutn" path="res://scenes/NPC.tscn" id="3_sklih"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_npp1v"]
 
 [node name="RoyalHall" type="Node2D" unique_id=1000000001]
 script = ExtResource("1_rhall")
 
+[node name="Background" type="ColorRect" parent="." unique_id=1636443465]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.101960786, 0.078431375, 0.0627451, 1)
+
+[node name="Floor" type="StaticBody2D" parent="." unique_id=1224975252]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor" unique_id=1777606697]
+position = Vector2(0, 400)
+shape = SubResource("WorldBoundaryShape2D_npp1v")
+
+[node name="Player" parent="." unique_id=564744777 instance=ExtResource("2_jtryb")]
+position = Vector2(200, 350)
+
+[node name="NPCs" type="Node2D" parent="." unique_id=64470308]
+position = Vector2(200, 350)
+
+[node name="Magician" parent="NPCs" unique_id=726728525 instance=ExtResource("3_sklih")]
+position = Vector2(400, 0)
+npc_name = "magician"
+
+[node name="Emperor" parent="NPCs" unique_id=454457522 instance=ExtResource("3_sklih")]
+position = Vector2(700, 0)
+npc_name = "emperor"
+npc_type = "emperor"
+
+[node name="Priestess" parent="NPCs" unique_id=1591764738 instance=ExtResource("3_sklih")]
+position = Vector2(1000, 0)
+npc_name = "priestess"
+npc_type = "priestess"
+
 [node name="UI" type="CanvasLayer" parent="." unique_id=1000000002]
 
-[node name="LabelLocation" type="Label" parent="UI" unique_id=1000000003]
-offset_left = 20.0
-offset_top = 16.0
-offset_right = 400.0
-offset_bottom = 44.0
-theme_override_colors/font_color = Color(0.788, 0.573, 0.165, 1)
-theme_override_font_sizes/font_size = 18
-text = "Aula Kerajaan"
-
-[node name="NPCButtons" type="VBoxContainer" parent="UI" unique_id=1000000004]
-offset_left = 20.0
-offset_top = 60.0
-offset_right = 380.0
-offset_bottom = 320.0
-theme_override_constants/separation = 10
-
-[node name="BtnMagician" type="Button" parent="UI/NPCButtons" unique_id=1000000005]
-layout_mode = 2
-text = "Bicara dengan Sang Alkemis  [The Magician]"
-
-[node name="BtnEmperor" type="Button" parent="UI/NPCButtons" unique_id=1000000006]
-layout_mode = 2
-text = "Menghadap Raja  [The Emperor]"
-
-[node name="BtnPriestess" type="Button" parent="UI/NPCButtons" unique_id=1000000007]
-layout_mode = 2
-text = "Dekati Sang Peramal Bisu  [The High Priestess]"
-
-[node name="BtnJokerMenu" type="Button" parent="UI/NPCButtons" unique_id=1000000008]
-layout_mode = 2
-text = "── Kelola Joker ──"
-
-[node name="BtnGoCombat" type="Button" parent="UI/NPCButtons" unique_id=1000000009]
-layout_mode = 2
-text = "Latihan Malam (Combat Normal)"
-
-[node name="BtnGoBoss" type="Button" parent="UI/NPCButtons" unique_id=1000000010]
-layout_mode = 2
-text = "Hadapi The Lovers (Boss Fight)"
-
 [node name="DialogueBox" type="PanelContainer" parent="UI" unique_id=1000000020]
-visible = false
-offset_left = 20.0
-offset_top = 440.0
-offset_right = 640.0
-offset_bottom = 600.0
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -127.0
+grow_horizontal = 2
+grow_vertical = 0
 
 [node name="VBox" type="VBoxContainer" parent="UI/DialogueBox" unique_id=1000000021]
 layout_mode = 2
@@ -81,56 +81,11 @@ text = "Lanjut ▶"
 layout_mode = 2
 text = "Tutup ✕"
 
-[node name="JokerPanel" type="PanelContainer" parent="UI" unique_id=1000000030]
-visible = false
-offset_left = 400.0
-offset_top = 20.0
-offset_right = 760.0
-offset_bottom = 400.0
-
-[node name="VBox" type="VBoxContainer" parent="UI/JokerPanel" unique_id=1000000031]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="LabelSlots" type="Label" parent="UI/JokerPanel/VBox" unique_id=1000000032]
-custom_minimum_size = Vector2(340, 140)
-layout_mode = 2
-text = "..."
-autowrap_mode = 3
-
-[node name="HBoxPick" type="HBoxContainer" parent="UI/JokerPanel/VBox" unique_id=1000000033]
-layout_mode = 2
-
-[node name="BtnPickJ1" type="Button" parent="UI/JokerPanel/VBox/HBoxPick" unique_id=1000000034]
-layout_mode = 2
-text = "◀ Prev"
-
-[node name="BtnPickJ2" type="Button" parent="UI/JokerPanel/VBox/HBoxPick" unique_id=1000000035]
-layout_mode = 2
-text = "Next ▶"
-
-[node name="HBoxEquip" type="HBoxContainer" parent="UI/JokerPanel/VBox" unique_id=1000000036]
-layout_mode = 2
-
-[node name="BtnEquip1" type="Button" parent="UI/JokerPanel/VBox/HBoxEquip" unique_id=1000000037]
-layout_mode = 2
-text = "Equip Slot 1"
-
-[node name="BtnEquip2" type="Button" parent="UI/JokerPanel/VBox/HBoxEquip" unique_id=1000000038]
-layout_mode = 2
-text = "Equip Slot 2"
-
-[node name="HBoxUnequip" type="HBoxContainer" parent="UI/JokerPanel/VBox" unique_id=1000000039]
-layout_mode = 2
-
-[node name="BtnUnequip1" type="Button" parent="UI/JokerPanel/VBox/HBoxUnequip" unique_id=1000000040]
-layout_mode = 2
-text = "Buang Slot 1"
-
-[node name="BtnUnequip2" type="Button" parent="UI/JokerPanel/VBox/HBoxUnequip" unique_id=1000000041]
-layout_mode = 2
-text = "Buang Slot 2"
-
-[node name="BtnCloseJoker" type="Button" parent="UI/JokerPanel/VBox" unique_id=1000000042]
-layout_mode = 2
-text = "Tutup ✕"
+[node name="BtnGoBoss" type="Button" parent="UI" unique_id=1000000010]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -366.0
+offset_bottom = 31.0
+grow_horizontal = 0
+text = "Hadapi The Lovers (Boss Fight)"
