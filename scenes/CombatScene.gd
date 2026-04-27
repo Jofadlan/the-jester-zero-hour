@@ -27,6 +27,7 @@ extends Node2D
 @onready var tutorial_panel = $UI/TutorialPanel
 @onready var tutorial_text = $UI/TutorialPanel/VBoxContainer/TutorialText
 @onready var btn_tutorial_next = $UI/TutorialPanel/VBoxContainer/BtnNext
+@onready var joker_panel = $UI/JokerPanel
 @export var card_sheet: Texture2D
 
 var evaluator: HandEvaluator
@@ -283,6 +284,7 @@ func _update_buttons():
 	btn_discard.disabled = selected_cards.is_empty() or jp_manager.is_empty()
 
 func _show_overlay_win():
+	_set_combat_ui_visible(false)
 	btn_play.disabled = true
 	btn_discard.disabled = true
 	btn_joker1.disabled = true
@@ -300,6 +302,7 @@ func _show_overlay_win():
 	UICorruptionTint.register(overlay_sub,   "theme_override_colors/font_color", true)
  
 func _show_overlay_lose():
+	_set_combat_ui_visible(false)
 	btn_play.disabled = true
 	btn_discard.disabled = true
 	btn_joker1.disabled = true
@@ -333,6 +336,7 @@ func _on_continue_pressed():
 		_apply_boss_stage(current_boss_stage)
 		deck_manager.shuffle_deck()
 		overlay.visible = false
+		_set_combat_ui_visible(true)
 		btn_discard.disabled = false
 		btn_joker1.disabled = false
 		btn_joker2.disabled = false
@@ -351,6 +355,7 @@ func _on_continue_pressed():
 		jp_manager.reset_for_duel(GameManager.get_joker_count())
 		deck_manager.shuffle_deck()
 		overlay.visible = false
+		_set_combat_ui_visible(true)
 		btn_discard.disabled = false
 		btn_joker1.disabled = false
 		btn_joker2.disabled = false
@@ -498,6 +503,7 @@ func _check_win():
 		_show_overlay_win()
 
 func _show_overlay_boss_next():
+	_set_combat_ui_visible(false)
 	btn_play.disabled = true
 	btn_discard.disabled = true
 	btn_joker1.disabled = true
@@ -514,6 +520,7 @@ func _show_overlay_boss_next():
 	overlay.visible = true
 
 func _show_overlay_boss_defeated():
+	_set_combat_ui_visible(false)
 	btn_play.disabled = true
 	btn_discard.disabled = true
 	btn_joker1.disabled = true
@@ -538,6 +545,7 @@ func _check_narrative_trigger():
 			return
 
 func _trigger_narrative(phase: NarrativePhase):
+	_set_combat_ui_visible(false)
 	phase.already_triggered = true
 	current_narrative = phase
 	
@@ -572,6 +580,7 @@ func _on_choice_pressed(choice_index: int):
 	
 	current_narrative = null
 	narrative_panel.visible = false
+	_set_combat_ui_visible(true)
 	
 	# Resume combat
 	btn_play.disabled = selected_cards.is_empty()
@@ -609,6 +618,7 @@ func _show_top_deck_preview() -> void:
 	hand_type_label.text = "Deck: " + ", ".join(names) + "..."
 
 func _show_tutorial():
+	_set_combat_ui_visible(false)
 	tutorial_panel.visible = true
 	btn_play.disabled = true
 	btn_discard.disabled = true
@@ -629,9 +639,16 @@ func _on_tutorial_next():
 		btn_tutorial_next.text = "Aku mengerti"
 
 func _end_tutorial():
+	_set_combat_ui_visible(true)
 	tutorial_panel.visible = false
 	btn_play.disabled = true  # tetap disabled sampai kartu dipilih
 	btn_discard.disabled = true
 	btn_joker1.disabled = false
 	btn_joker2.disabled = false
 	_tutorial_index = 0
+
+func _set_combat_ui_visible(visible: bool) -> void:
+	hand_container.visible = visible
+	joker_panel.visible = visible  # $UI/JokerPanel
+	btn_play.visible = visible
+	btn_discard.visible = visible
