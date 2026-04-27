@@ -79,6 +79,13 @@ var joker_discovery_state: Dictionary = {}
 
 func _ready() -> void:
 	_init_discovery_state()
+	# Demo: auto-equip 2 joker yang available
+	var nightly = JokerFactory.create_nightly_prowess()
+	var oily = JokerFactory.create_oily_torch()
+	nightly.reveal()
+	oily.reveal()
+	joker_slots[0] = nightly
+	joker_slots[1] = oily
 
 func _init_discovery_state() -> void:
 	for joker_type in JOKER_LOCATIONS.keys():
