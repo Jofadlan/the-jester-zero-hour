@@ -7,38 +7,36 @@ const INTERACT_RADIUS = 100.0
 @onready var label_text     : Label   = $UI/DialogueBox/VBox/LabelText
 @onready var btn_next       : Button  = $UI/DialogueBox/VBox/HBox/BtnNext
 @onready var btn_close      : Button  = $UI/DialogueBox/VBox/HBox/BtnClose
-@onready var btn_go_boss    : Button  = $UI/BtnGoBoss
 
-var _dialogue_queue : Array[String] = []
-var _current_speaker: String = ""
-var _player: Node = null
+# Choice buttons — tambahkan 2 button ini di DialogueBox/VBox/HBox di scene
+@onready var btn_choice_1   : Button  = $UI/DialogueBox/VBox/HBox/BtnChoice1
+@onready var btn_choice_2   : Button  = $UI/DialogueBox/VBox/HBox/BtnChoice2
+
+var _dialogue_queue  : Array[String] = []
+var _current_speaker : String = ""
+var _player          : Node   = null
+var _pending_choices : Array  = []  # [{text, callable}]
 
 func _ready():
-	# Pastikan UI visible
 	$UI.visible = true
 	dialogue_box.hide()
-	btn_go_boss.hide()
 
 	btn_next.pressed.connect(_advance_dialogue)
 	btn_close.pressed.connect(_close_dialogue)
+	btn_choice_1.pressed.connect(_on_choice_pressed.bind(0))
+	btn_choice_2.pressed.connect(_on_choice_pressed.bind(1))
 
-	if GameManager.tutorial_done:
-		btn_go_boss.show()
+	btn_choice_1.hide()
+	btn_choice_2.hide()
 
-	# Cari player
 	await get_tree().process_frame
 	var players = get_tree().get_nodes_in_group("player")
 	if players.size() > 0:
 		_player = players[0]
-	else:
-		# Fallback — cari by class
-		_player = $Player if has_node("Player") else null
 
 func _process(_delta):
 	if _player == null:
 		return
-
-	# Update NPC indicators berdasarkan jarak
 	for npc in get_tree().get_nodes_in_group("npc"):
 		var dist = _player.global_position.distance_to(npc.global_position)
 		if dist < INTERACT_RADIUS:
@@ -47,26 +45,27 @@ func _process(_delta):
 			npc.hide_indicator()
 
 func _input(event):
-	# Tutup dialogue dengan E atau close button
-	if event.is_action_pressed("interact") and dialogue_box.visible:
+	if event.is_action_pressed("interact") and dialogue_box.visible and _pending_choices.is_empty():
 		_advance_dialogue()
 		return
 
-	# Buka dialogue
 	if event.is_action_pressed("interact") and not dialogue_box.visible:
-		if _player == null:
-			return
 		_try_interact()
 
+# ── INTERACTION ────────────────────────────────────
+
 func _try_interact():
-	var closest_npc: Node = null
-	var closest_dist := INTERACT_RADIUS
+	if _player == null:
+		return
+
+	var closest_npc : Node  = null
+	var closest_dist: float = INTERACT_RADIUS
 
 	for npc in get_tree().get_nodes_in_group("npc"):
 		var dist = _player.global_position.distance_to(npc.global_position)
 		if dist < closest_dist:
 			closest_dist = dist
-			closest_npc = npc
+			closest_npc  = npc
 
 	if closest_npc == null:
 		return
@@ -76,24 +75,67 @@ func _try_interact():
 		"emperor":   _talk_emperor()
 		"priestess": _talk_priestess()
 
-# ── DIALOGUE ──────────────────────────────────────
+# ── DIALOGUE ENGINE ────────────────────────────────
 
-func _open_dialogue(speaker: String, lines: Array[String]):
-	_current_speaker = speaker
+func _open_dialogue(speaker: String, lines: Array[String], choices: Array = []):
+	_current_speaker  = speaker
 	_dialogue_queue   = lines.duplicate()
+	_pending_choices  = choices
+	btn_next.show()
+	btn_close.show()
+	btn_choice_1.hide()
+	btn_choice_2.hide()
 	dialogue_box.show()
 	_advance_dialogue()
 
 func _advance_dialogue():
-	if _dialogue_queue.is_empty():
-		_close_dialogue()
+	if not _dialogue_queue.is_empty():
+		label_speaker.text = _current_speaker
+		label_text.text    = _dialogue_queue.pop_front()
+
+		# Kalau ini line terakhir dan ada choices, tampilkan choices
+		if _dialogue_queue.is_empty() and not _pending_choices.is_empty():
+			_show_choices()
 		return
-	label_speaker.text = _current_speaker
-	label_text.text    = _dialogue_queue.pop_front()
+
+	# Queue habis dan tidak ada choices — tutup
+	if _pending_choices.is_empty():
+		_close_dialogue()
+
+func _show_choices():
+	btn_next.hide()
+	btn_close.hide()
+
+	if _pending_choices.size() >= 1:
+		btn_choice_1.text = _pending_choices[0]["text"]
+		btn_choice_1.show()
+
+	if _pending_choices.size() >= 2:
+		btn_choice_2.text = _pending_choices[1]["text"]
+		btn_choice_2.show()
+
+func _on_choice_pressed(index: int):
+	if index >= _pending_choices.size():
+		return
+
+	var choice = _pending_choices[index]
+	_pending_choices = []
+	btn_choice_1.hide()
+	btn_choice_2.hide()
+	_close_dialogue()
+
+	# Jalankan aksi setelah dialogue tutup
+	if choice.has("action"):
+		choice["action"].call()
 
 func _close_dialogue():
 	dialogue_box.hide()
 	_dialogue_queue.clear()
+	_pending_choices = []
+	btn_next.show()
+	btn_close.show()
+	btn_choice_1.hide()
+	btn_choice_2.hide()
 
 # ── NPC TALKS ─────────────────────────────────────
 
@@ -104,15 +146,34 @@ func _talk_magician():
 			_open_dialogue("The Magician", [
 				"Ah, si pelawak malam. Kau berlatih lagi tadi malam, bukan?",
 				"Tanganmu... tidak seperti tangan badut biasa.",
-				"Jika kau butuh buku taktik — perpustakaanku terbuka.",
+				"Malam ini — apakah kau ingin berlatih lagi?",
+			], [
+				{
+					"text": "\"Iya. Aku butuh berlatih.\"",
+					"action": Callable(self, "_go_combat_normal")
+				},
+				{
+					"text": "\"Ceritakan tentang The Lovers.\"",
+					"action": Callable(self, "_go_combat_boss")
+				},
 			])
 		"grey":
 			_open_dialogue("The Magician", [
 				"Matamu semakin berat hari ini.",
 				"Aku pernah melihat mata seperti itu. Orang yang menanggung sesuatu terlalu lama.",
-				"Hati-hati. Beban itu bisa mengubah caramu memegang pedang.",
+				"...Apakah kau masih ingin berlatih? Dalam kondisi seperti ini?",
+			], [
+				{
+					"text": "\"Justru itulah aku harus berlatih.\"",
+					"action": Callable(self, "_go_combat_normal")
+				},
+				{
+					"text": "\"Tidak. Aku hanya ingin bicara.\"",
+					"action": func(): pass
+				},
 			])
 		"joker":
+			# Corruption tinggi — Magician menolak melatih
 			_open_dialogue("The Magician", [
 				"...",
 				"Kau masih di sini. Aku kira kau sudah pergi.",
@@ -161,3 +222,13 @@ func _talk_priestess():
 				"*Ia berpaling darimu.*",
 				"*Pertama kalinya.*",
 			])
+
+# ── COMBAT TRANSITIONS ────────────────────────────
+
+func _go_combat_normal():
+	GameManager.combat_mode = "normal"
+	get_tree().change_scene_to_file("res://scenes/CombatScene.tscn")
+
+func _go_combat_boss():
+	GameManager.combat_mode = "boss"
+	get_tree().change_scene_to_file("res://scenes/CombatScene.tscn")
