@@ -478,6 +478,12 @@ text = "Lanjut ▶"
 layout_mode = 2
 text = "Tutup ✕"
 
+[node name="BtnChoice1" type="Button" parent="UI/DialogueBox/VBox/HBox" unique_id=104827428]
+layout_mode = 2
+
+[node name="BtnChoice2" type="Button" parent="UI/DialogueBox/VBox/HBox" unique_id=1159775861]
+layout_mode = 2
+
 [node name="BtnGoBoss" type="Button" parent="UI" unique_id=1741965185]
 anchors_preset = 1
 anchor_left = 1.0
