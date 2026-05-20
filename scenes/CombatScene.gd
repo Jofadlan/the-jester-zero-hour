@@ -29,6 +29,7 @@ extends Node2D
 @onready var btn_tutorial_next = $UI/TutorialPanel/VBoxContainer/BtnNext
 @onready var joker_panel = $UI/JokerPanel
 @export var card_sheet: Texture2D
+@onready var btn_tutorial_skip: Button = $UI/TutorialPanel/VBoxContainer/BtnSkip
 
 var evaluator: HandEvaluator
 var selected_cards: Array[Card] = []
@@ -98,6 +99,12 @@ func _ready():
 		setup_normal_combat()
 		jp_manager.reset_for_duel(GameManager.get_joker_count())
 	
+	if not GameManager.tutorial_done:
+		_show_tutorial()
+		GameManager.complete_tutorial()
+	else:
+		_deal_hand()
+		
 	_update_ui()
 	_update_joker_display()
 	_deal_hand()
@@ -617,15 +624,15 @@ func _show_top_deck_preview() -> void:
 	names.reverse()  # top of deck duluan
 	hand_type_label.text = "Deck: " + ", ".join(names) + "..."
 
-func _show_tutorial():
+func _show_tutorial() -> void:
 	_set_combat_ui_visible(false)
 	tutorial_panel.visible = true
-	btn_play.disabled = true
-	btn_discard.disabled = true
-	btn_joker1.disabled = true
-	btn_joker2.disabled = true
 	tutorial_text.text = _tutorial_slides[0]
 	btn_tutorial_next.text = "Lanjut ▶"
+	btn_tutorial_skip.pressed.connect(_on_tutorial_skip)
+
+func _on_tutorial_skip() -> void:
+	_end_tutorial()
 
 func _on_tutorial_next():
 	_tutorial_index += 1
@@ -639,13 +646,12 @@ func _on_tutorial_next():
 		btn_tutorial_next.text = "Aku mengerti"
 
 func _end_tutorial():
-	_set_combat_ui_visible(true)
 	tutorial_panel.visible = false
-	btn_play.disabled = true  # tetap disabled sampai kartu dipilih
+	_set_combat_ui_visible(true)
+	btn_play.disabled = true
 	btn_discard.disabled = true
-	btn_joker1.disabled = false
-	btn_joker2.disabled = false
 	_tutorial_index = 0
+	_deal_hand()  # deal di sini, bukan di _ready
 
 func _set_combat_ui_visible(visible: bool) -> void:
 	hand_container.visible = visible

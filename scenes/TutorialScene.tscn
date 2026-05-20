@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://bmb4ahav2vbcg"]
+
+[ext_resource type="Script" uid="uid://d3ryg3qbjtnmd" path="res://scenes/TutorialScene.gd" id="1_vgu8r"]
+
+[node name="TutorialScene" type="Node2D" unique_id=2046169311]
+script = ExtResource("1_vgu8r")
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=1072766873]
+
+[node name="Background" type="ColorRect" parent="UI" unique_id=1775927288]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.101960786, 0.078431375, 0.0627451, 1)
+
+[node name="Panel" type="PanelContainer" parent="UI" unique_id=762684684]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="UI/Panel" unique_id=671075034]
+layout_mode = 2
+
+[node name="TextLabel" type="Label" parent="UI/Panel/VBox" unique_id=1019877027]
+custom_minimum_size = Vector2(500, 150)
+layout_mode = 2
+autowrap_mode = 2
+
+[node name="BtnNext" type="Button" parent="UI/Panel/VBox" unique_id=1871316244]
+layout_mode = 2
+
+[node name="BtnSkip" type="Button" parent="UI/Panel/VBox" unique_id=307731191]
+layout_mode = 2

@@ -208,6 +208,10 @@ autowrap_mode = 3
 layout_mode = 2
 text = "Lanjut ▶"
 
+[node name="BtnSkip" type="Button" parent="UI/TutorialPanel/VBoxContainer" unique_id=1667332425]
+layout_mode = 2
+text = "SKIP >>"
+
 [node name="Managers" type="Node" parent="." unique_id=95716239]
 
 [node name="DeckManager" type="Node" parent="Managers" unique_id=373892316]
