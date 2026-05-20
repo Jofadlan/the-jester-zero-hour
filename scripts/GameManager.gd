@@ -121,3 +121,5 @@ var tutorial_done: bool = false
 
 func complete_tutorial():
 	tutorial_done = true
+
+var target_spawn_node: String = ""
