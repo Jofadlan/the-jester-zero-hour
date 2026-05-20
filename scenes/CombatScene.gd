@@ -304,6 +304,8 @@ func _show_overlay_win():
 	btn_continue.visible = false
 	btn_stop.visible = true
 	btn_stop.text = "Selesai"
+	if not is_boss_fight:
+		GameManager.normal_combat_cleared = true
 	overlay.visible = true
 	UICorruptionTint.register(overlay_title, "theme_override_colors/font_color")
 	UICorruptionTint.register(overlay_sub,   "theme_override_colors/font_color", true)
