@@ -12,8 +12,19 @@ var corruption: int = 0
 # Gold
 var gold: int = 0
 
+var talked_to_priestess: bool = false
+var talked_to_emperor: bool = false
+var talked_to_magician: bool = false
+var normal_combat_cleared: bool = false
+
 var combat_mode: String = "normal"  # "normal" atau "boss"
 var boss_stage_effects: Array = []  # efek per stage boss
+
+func complete_talk(npc_type: String) -> void:
+	match npc_type:
+		"priestess": talked_to_priestess = true
+		"emperor": talked_to_emperor = true
+		"magician": talked_to_magician = true
 
 func add_corruption(amount: int) -> void:
 	corruption = clamp(corruption + amount, 0, 100)
@@ -79,6 +90,13 @@ var joker_discovery_state: Dictionary = {}
 
 func _ready() -> void:
 	_init_discovery_state()
+	## Demo: auto-equip 2 joker yang available
+	#var nightly = JokerFactory.create_nightly_prowess()
+	#var oily = JokerFactory.create_oily_torch()
+	#nightly.reveal()
+	#oily.reveal()
+	#joker_slots[0] = nightly
+	#joker_slots[1] = oily
 
 func _init_discovery_state() -> void:
 	for joker_type in JOKER_LOCATIONS.keys():
