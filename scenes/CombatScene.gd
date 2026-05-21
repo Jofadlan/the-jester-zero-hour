@@ -24,7 +24,12 @@ extends Node2D
 @onready var narrative_text = $UI/NarrativePanel/VBoxContainer/NarrativeText
 @onready var btn_choice1 = $UI/NarrativePanel/VBoxContainer/BtnChoice1
 @onready var btn_choice2 = $UI/NarrativePanel/VBoxContainer/BtnChoice2
+@onready var tutorial_panel = $UI/TutorialPanel
+@onready var tutorial_text = $UI/TutorialPanel/VBoxContainer/TutorialText
+@onready var btn_tutorial_next = $UI/TutorialPanel/VBoxContainer/BtnNext
+@onready var joker_panel = $UI/JokerPanel
 @export var card_sheet: Texture2D
+@onready var btn_tutorial_skip: Button = $UI/TutorialPanel/VBoxContainer/BtnSkip
 
 var evaluator: HandEvaluator
 var selected_cards: Array[Card] = []
@@ -50,6 +55,17 @@ var current_stage_effect: String = ""
 var narrative_phases: Array = []
 var current_narrative: NarrativePhase = null
 
+var _tutorial_slides: Array[String] = [
+	"*Suara muncul dari antah berantah, seperti bisikan yang tidak berasal dari mana-mana*\n\n\"Kau punya 7 kartu. Pilih hingga 5 kartu, lalu mainkan kombinasi terbaikmu. Skor akan terakumulasi hingga mencapai target.\n\nJika kartu tidak berguna — buang. Tapi ingat, membuang kartu menghabiskan JP.\"",
+	
+	"*Suara itu kembali, lebih pelan*\n\n\"Kombinasi yang bisa kau mainkan:\n\nHigh Card → Pair → Two Pair\nThree of a Kind → Straight → Flush\nFull House → Four of a Kind\nStraight Flush → Royal Flush\n\nSemakin tinggi kombinasi, semakin besar skormu.\"",
+	
+	"*Seperti seseorang yang sudah melihat ini ribuan kali*\n\n\"Jester Points — JP — adalah sumber dayamu. Digunakan untuk membuang kartu dan mengaktifkan Joker.\n\nJoker adalah kekuatan langka. Aktifkan dengan bijak — efeknya hanya berlaku satu hand.\"",
+	
+    "*Terakhir*\n\n\"Target skor ada di layar. Capai sebelum hands habis.\n\nJika gagal... corruption menunggu.\n\nSelamat bermain, Jester. Atau apapun yang kau putuskan untuk menjadi.\""
+]
+
+var _tutorial_index: int = 0
 
 const HAND_NAMES = {
 	0: "High Card", 1: "Pair", 2: "Two Pair",
@@ -83,6 +99,12 @@ func _ready():
 		setup_normal_combat()
 		jp_manager.reset_for_duel(GameManager.get_joker_count())
 	
+	if not GameManager.tutorial_done:
+		_show_tutorial()
+		GameManager.complete_tutorial()
+	else:
+		_deal_hand()
+		
 	_update_ui()
 	_update_joker_display()
 	_deal_hand()
@@ -99,6 +121,9 @@ func _ready():
  
 	# Force sync agar warna langsung sesuai corruption saat scene dibuka
 	UICorruptionTint.force_sync()
+		
+	btn_tutorial_next.pressed.connect(_on_tutorial_next)
+	_show_tutorial()
 
 func _deal_hand():
 	deck_manager.deal_hand()
@@ -266,6 +291,7 @@ func _update_buttons():
 	btn_discard.disabled = selected_cards.is_empty() or jp_manager.is_empty()
 
 func _show_overlay_win():
+	_set_combat_ui_visible(false)
 	btn_play.disabled = true
 	btn_discard.disabled = true
 	btn_joker1.disabled = true
@@ -278,11 +304,14 @@ func _show_overlay_win():
 	btn_continue.visible = false
 	btn_stop.visible = true
 	btn_stop.text = "Selesai"
+	if not is_boss_fight:
+		GameManager.normal_combat_cleared = true
 	overlay.visible = true
 	UICorruptionTint.register(overlay_title, "theme_override_colors/font_color")
 	UICorruptionTint.register(overlay_sub,   "theme_override_colors/font_color", true)
  
 func _show_overlay_lose():
+	_set_combat_ui_visible(false)
 	btn_play.disabled = true
 	btn_discard.disabled = true
 	btn_joker1.disabled = true
@@ -316,6 +345,7 @@ func _on_continue_pressed():
 		_apply_boss_stage(current_boss_stage)
 		deck_manager.shuffle_deck()
 		overlay.visible = false
+		_set_combat_ui_visible(true)
 		btn_discard.disabled = false
 		btn_joker1.disabled = false
 		btn_joker2.disabled = false
@@ -334,6 +364,7 @@ func _on_continue_pressed():
 		jp_manager.reset_for_duel(GameManager.get_joker_count())
 		deck_manager.shuffle_deck()
 		overlay.visible = false
+		_set_combat_ui_visible(true)
 		btn_discard.disabled = false
 		btn_joker1.disabled = false
 		btn_joker2.disabled = false
@@ -481,6 +512,7 @@ func _check_win():
 		_show_overlay_win()
 
 func _show_overlay_boss_next():
+	_set_combat_ui_visible(false)
 	btn_play.disabled = true
 	btn_discard.disabled = true
 	btn_joker1.disabled = true
@@ -497,6 +529,7 @@ func _show_overlay_boss_next():
 	overlay.visible = true
 
 func _show_overlay_boss_defeated():
+	_set_combat_ui_visible(false)
 	btn_play.disabled = true
 	btn_discard.disabled = true
 	btn_joker1.disabled = true
@@ -521,6 +554,7 @@ func _check_narrative_trigger():
 			return
 
 func _trigger_narrative(phase: NarrativePhase):
+	_set_combat_ui_visible(false)
 	phase.already_triggered = true
 	current_narrative = phase
 	
@@ -555,6 +589,7 @@ func _on_choice_pressed(choice_index: int):
 	
 	current_narrative = null
 	narrative_panel.visible = false
+	_set_combat_ui_visible(true)
 	
 	# Resume combat
 	btn_play.disabled = selected_cards.is_empty()
@@ -590,3 +625,38 @@ func _show_top_deck_preview() -> void:
 	var names = preview.map(func(c): return c.get_display_name())
 	names.reverse()  # top of deck duluan
 	hand_type_label.text = "Deck: " + ", ".join(names) + "..."
+
+func _show_tutorial() -> void:
+	_set_combat_ui_visible(false)
+	tutorial_panel.visible = true
+	tutorial_text.text = _tutorial_slides[0]
+	btn_tutorial_next.text = "Lanjut ▶"
+	btn_tutorial_skip.pressed.connect(_on_tutorial_skip)
+
+func _on_tutorial_skip() -> void:
+	_end_tutorial()
+
+func _on_tutorial_next():
+	_tutorial_index += 1
+	if _tutorial_index >= _tutorial_slides.size():
+		_end_tutorial()
+		return
+	
+	tutorial_text.text = _tutorial_slides[_tutorial_index]
+	
+	if _tutorial_index == _tutorial_slides.size() - 1:
+		btn_tutorial_next.text = "Aku mengerti"
+
+func _end_tutorial():
+	tutorial_panel.visible = false
+	_set_combat_ui_visible(true)
+	btn_play.disabled = true
+	btn_discard.disabled = true
+	_tutorial_index = 0
+	_deal_hand()  # deal di sini, bukan di _ready
+
+func _set_combat_ui_visible(visible: bool) -> void:
+	hand_container.visible = visible
+	joker_panel.visible = visible  # $UI/JokerPanel
+	btn_play.visible = visible
+	btn_discard.visible = visible

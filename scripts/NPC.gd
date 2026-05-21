@@ -19,15 +19,6 @@ func _ready():
 	interaction_zone.body_entered.connect(_on_zone_body_entered)
 	interaction_zone.body_exited.connect(_on_zone_body_exited)
 
-func interact():
-	interaction_triggered.emit(npc_type)
-
-func show_indicator():
-	indicator.visible = true
-
-func hide_indicator():
-	indicator.visible = false
-
 # ── ZONE CALLBACKS (fallback jika Player pakai CharacterBody2D) ──
 
 func _on_zone_body_entered(body: Node) -> void:
@@ -37,3 +28,26 @@ func _on_zone_body_entered(body: Node) -> void:
 func _on_zone_body_exited(body: Node) -> void:
 	if body.is_in_group("player") or body is CharacterBody2D:
 		hide_indicator()
+		
+var is_locked: bool = false
+
+func set_locked(value: bool) -> void:
+	is_locked = value
+	if is_locked:
+		modulate = Color(0.4, 0.4, 0.4, 1.0)
+		indicator.text = "[?]"
+	else:
+		modulate = Color(1, 1, 1, 1)
+		indicator.text = "[E]"
+
+func show_indicator() -> void:
+	indicator.visible = true
+
+func hide_indicator() -> void:
+	indicator.visible = false
+
+# override interact check
+func interact() -> void:
+	if is_locked:
+		return
+	interaction_triggered.emit(npc_type)
