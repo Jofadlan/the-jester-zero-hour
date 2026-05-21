@@ -353,6 +353,11 @@ func _go_combat_boss():
 	GameManager.combat_mode = "boss"
 	get_tree().change_scene_to_file("res://scenes/CombatScene.tscn")
 
+# ── MAP TRANSITIONS ────────────────────────────
+func _on_to_prison_body_entered(body: Node2D) -> void:
+	if body.is_in_group("player"):
+		GameManager.target_spawn_node = "SpawnPoint"
+		get_tree().change_scene_to_file("res://scenes/Prison.tscn")
 func _refresh_task_tracker() -> void:
 	var lines: Array[String] = []
 	
