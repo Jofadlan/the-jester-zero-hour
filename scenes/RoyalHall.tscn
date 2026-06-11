@@ -438,6 +438,9 @@ color = Color(0.101960786, 0.078431375, 0.0627451, 1)
 y_sort_enabled = true
 position = Vector2(578, 511)
 
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1310065409]
+position = Vector2(580, 430)
+
 [node name="NPCs" type="Node2D" parent="." unique_id=64470308]
 position = Vector2(200, 350)
 

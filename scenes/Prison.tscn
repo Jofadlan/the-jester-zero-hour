@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://dg2g6lsixdmtv" path="res://asset/Interior_guild.png" id="6_spdu0"]
 [ext_resource type="PackedScene" uid="uid://dkyhw6w2ccbdr" path="res://scenes/Player.tscn" id="7_sf8be"]
 [ext_resource type="Script" uid="uid://b26q50ha5ikwk" path="res://scenes/Prison.gd" id="script_prison"]
+[ext_resource type="Script" uid="uid://b26q50ha5ikwk" path="res://scenes/Prison.gd" id="script_prison"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_jhbke"]
 texture = ExtResource("2_yu1v4")
@@ -467,6 +468,9 @@ radius = 48.0
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_spdu0"]
 size = Vector2(34, 24)
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_boss"]
+radius = 48.0
+
 [node name="Prison" type="Node2D" unique_id=1195165496]
 script = ExtResource("script_prison")
 
@@ -550,3 +554,59 @@ text = "Bawa aku ke sana"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StairExit" unique_id=2093007192]
 position = Vector2(964, 365)
 shape = SubResource("RectangleShape2D_spdu0")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=9001000000]
+position = Vector2(900, 380)
+current = true
+ 
+[node name="BossArea" type="Node2D" parent="." unique_id=9001000001]
+position = Vector2(702, 80)
+ 
+[node name="BossLabel" type="Label" parent="BossArea" unique_id=9001000002]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -28.0
+offset_top = -24.0
+offset_right = 28.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "[ ??? ]"
+theme_override_colors/font_color = Color(0.788, 0.573, 0.165, 1)
+ 
+[node name="BossZone" type="Area2D" parent="BossArea" unique_id=9001000003]
+collision_layer = 0
+ 
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BossArea/BossZone" unique_id=9001000004]
+shape = SubResource("CircleShape2D_boss")
+ 
+[node name="UIPopUp" type="CanvasLayer" parent="." unique_id=9001000005]
+ 
+[node name="BossDialoguePanel" type="PanelContainer" parent="UIPopUp" unique_id=9001000006]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -225.0
+offset_top = -80.0
+offset_right = 225.0
+offset_bottom = 80.0
+grow_horizontal = 2
+grow_vertical = 2
+ 
+[node name="Vbox" type="VBoxContainer" parent="UIPopUp/BossDialoguePanel" unique_id=9001000007]
+layout_mode = 2
+theme_override_constants/separation = 12
+ 
+[node name="BossText" type="Label" parent="UIPopUp/BossDialoguePanel/Vbox" unique_id=9001000008]
+custom_minimum_size = Vector2(430, 100)
+layout_mode = 2
+autowrap_mode = 3
+ 
+[node name="BtnConfirm" type="Button" parent="UIPopUp/BossDialoguePanel/Vbox" unique_id=9001000009]
+layout_mode = 2
+text = "Bawa aku ke sana"

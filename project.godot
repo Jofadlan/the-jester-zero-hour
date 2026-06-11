@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="the-jester-zero-hour"
-run/main_scene="uid://d2bvkya5fv7h"
+run/main_scene="uid://cv0m5e25wnimv"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="uid://cnrhoahydt3pi"
 
