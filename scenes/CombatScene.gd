@@ -374,7 +374,10 @@ func _on_continue_pressed():
 
 func _on_stop_pressed():
 	GameManager.combat_mode = "normal"
-	get_tree().change_scene_to_file("res://scenes/RoyalHall.tscn")
+	if is_boss_fight and overlay_title.text == "✦ BOSS DEFEATED":
+		get_tree().change_scene_to_file("res://scenes/CreditScene.tscn")
+	else:
+		get_tree().change_scene_to_file("res://scenes/RoyalHall.tscn")
 
 func _update_joker_display():
 	for i in 2:
@@ -543,6 +546,9 @@ func _show_overlay_boss_defeated():
 	btn_stop.visible = true
 	btn_stop.text = "Selesai"
 	overlay.visible = true
+	UICorruptionTint.register(overlay_title, "theme_override_colors/font_color")
+	UICorruptionTint.register(overlay_sub,   "theme_override_colors/font_color", true)
+
 
 func _check_narrative_trigger():
 	for phase in narrative_phases:

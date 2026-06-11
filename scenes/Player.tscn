@@ -218,5 +218,5 @@ shape = SubResource("RectangleShape2D_v6fml")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1889245359]
 visible = false
-curent = false
+enabled = false
 limit_left = 0
