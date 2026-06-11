@@ -535,9 +535,9 @@ offset_left = -40.0
 offset_bottom = 40.0
 grow_horizontal = 0
 text = "Hadapi The Lovers (Boss Fight)"
+bbcode_enabled = true
 
 [connection signal="body_entered" from="MapDesain/ToPrison" to="." method="_on_to_prison_body_entered"]
-bbcode_enabled = true
 
 [node name="PopupPanel" type="PanelContainer" parent="UIPopUp" unique_id=520178394]
 visible = false
