@@ -9,27 +9,21 @@ const INTERACT_RADIUS = 100.0
 @onready var btn_close      : Button  = $UI/DialogueBox/VBox/HBox/BtnClose
 @onready var btn_choice_1   : Button  = $UI/DialogueBox/VBox/HBox/BtnChoice1
 @onready var btn_choice_2   : Button  = $UI/DialogueBox/VBox/HBox/BtnChoice2
-@onready var boss_area      : Node2D  = $BossArea
-@onready var boss_label     : Label   = $BossArea/BossLabel
-@onready var boss_zone      : Area2D  = $BossArea/BossZone
 @onready var task_label     : RichTextLabel = $UIPopUp/TaskTracker
 @onready var popup_panel    : PanelContainer = $UIPopUp/PopupPanel
 @onready var popup_text     : Label = $UIPopUp/PopupPanel/Vbox/PopupText
 @onready var btn_popup_close: Button = $UIPopUp/PopupPanel/Vbox/BtnClose
-@onready var boss_dialogue_panel  : PanelContainer = $UIPopUp/BossDialoguePanel
-@onready var boss_dialogue_text   : Label = $UIPopUp/BossDialoguePanel/Vbox/BossText
-@onready var btn_boss_confirm     : Button = $UIPopUp/BossDialoguePanel/Vbox/BtnConfirm
 
 var _dialogue_queue  : Array[String] = []
 var _current_speaker : String = ""
 var _player          : Node   = null
 var _pending_choices : Array  = []
+var _combat_cleared_popup_shown : bool = false
 
 func _ready():
 	$UI.visible = true
 	dialogue_box.hide()
 	popup_panel.hide()
-	boss_dialogue_panel.hide()
 
 	btn_next.pressed.connect(_advance_dialogue)
 	btn_close.pressed.connect(_close_dialogue)
@@ -39,23 +33,14 @@ func _ready():
 	btn_choice_2.hide()
 
 	btn_popup_close.pressed.connect(func(): popup_panel.hide())
-	btn_boss_confirm.pressed.connect(_on_boss_confirm)
-	boss_zone.body_entered.connect(_on_boss_zone_entered)
 
 	_refresh_npc_states()
-	_refresh_boss_area()
 	_refresh_task_tracker()
-	btn_next.pressed.connect(_advance_dialogue)
-	btn_close.pressed.connect(_close_dialogue)
-	btn_choice_1.pressed.connect(_on_choice_pressed.bind(0))
-	btn_choice_2.pressed.connect(_on_choice_pressed.bind(1))
-	btn_choice_1.hide()
-	btn_choice_2.hide()
 
-	boss_zone.body_entered.connect(_on_boss_zone_entered)
-
-	_refresh_npc_states()
-	_refresh_boss_area()
+	# Tampilkan popup sekali saat kembali dari combat yang menang
+	if GameManager.normal_combat_cleared and not _combat_cleared_popup_shown:
+		_combat_cleared_popup_shown = true
+		_show_popup(POPUP_TEXTS["combat_cleared"])
 
 func _on_ready_deferred() -> void:
 	var players = get_tree().get_nodes_in_group("player")
@@ -78,11 +63,6 @@ func _refresh_npc_states() -> void:
 	if magician:
 		magician.set_locked(not GameManager.talked_to_emperor)
 
-func _refresh_boss_area() -> void:
-	var unlocked = GameManager.normal_combat_cleared
-	boss_label.text = "[ The Lovers ]" if unlocked else "[ ??? ]"
-	boss_area.modulate = Color(1, 1, 1, 1) if unlocked else Color(0.35, 0.3, 0.3, 1)
-
 func _get_npc(type: String) -> Node:
 	for npc in get_tree().get_nodes_in_group("npc"):
 		if npc.npc_type == type:
@@ -102,21 +82,6 @@ func _process(_delta):
 		else:
 			npc.hide_indicator()
 
-func _on_boss_zone_entered(body: Node) -> void:
-	if not body.is_in_group("player"):
-		return
-	if not GameManager.normal_combat_cleared:
-		return
-	_show_boss_dialogue()
-
-func _show_boss_dialogue() -> void:
-	boss_dialogue_text.text = "*Suara itu terdengar lebih berat dari sebelumnya...*\n\n\"Kau sudah sampai di sini.\n\nYang ada di balik pintu itu bukan musuh biasa. Ia adalah cerminan dari pilihan yang belum pernah kau buat — dan semua yang ingin kau hindari dari dirimu sendiri.\n\nApakah kau siap menghadapinya?\""
-	boss_dialogue_panel.show()
-
-func _on_boss_confirm() -> void:
-	boss_dialogue_panel.hide()
-	_go_combat_boss()
-	
 func _input(event):
 	if event.is_action_pressed("interact") and dialogue_box.visible and _pending_choices.is_empty():
 		_advance_dialogue()
@@ -349,10 +314,6 @@ func _go_combat_normal():
 	GameManager.combat_mode = "normal"
 	get_tree().change_scene_to_file("res://scenes/CombatScene.tscn")
 
-func _go_combat_boss():
-	GameManager.combat_mode = "boss"
-	get_tree().change_scene_to_file("res://scenes/CombatScene.tscn")
-
 # ── MAP TRANSITIONS ────────────────────────────
 func _on_to_prison_body_entered(body: Node2D) -> void:
 	if body.is_in_group("player"):
@@ -365,7 +326,10 @@ func _refresh_task_tracker() -> void:
 	_add_task(lines, "Temui The Emperor", GameManager.talked_to_emperor, GameManager.talked_to_priestess and not GameManager.talked_to_emperor)
 	_add_task(lines, "Temui The Magician", GameManager.talked_to_magician, GameManager.talked_to_emperor and not GameManager.talked_to_magician)
 	_add_task(lines, "Latihan Malam", GameManager.normal_combat_cleared, GameManager.talked_to_magician and not GameManager.normal_combat_cleared)
-	_add_task(lines, "???", false, false) if not GameManager.normal_combat_cleared else _add_task(lines, "Hadapi The Lovers", false, true)
+	if not GameManager.normal_combat_cleared:
+		_add_task(lines, "???", false, false)
+	else:
+		_add_task(lines, "Hadapi The Lovers (di Penjara)", false, true)
 	
 	task_label.text = "\n".join(lines)
 
@@ -385,5 +349,5 @@ const POPUP_TEXTS = {
 	"priestess_done": "*Suara dari antah berantah...*\n\n\"Ia tidak berkata apa-apa. Tapi tangannya menyodorkan sesuatu.\nMungkin ia tahu lebih banyak dari yang ia tunjukkan.\n\nTemui Raja selanjutnya.\"",
 	"emperor_done": "*Suara itu kembali...*\n\n\"Bahkan yang paling keras pun kadang menyerahkan sesuatu tanpa alasan yang jelas.\n\nCari Sang Alkemis. Ia menunggumu.\"",
 	"magician_done": "*Berbisik pelan...*\n\n\"Ia melihat tanganmu. Tangan yang sudah berubah.\n\nLatihan menunggumu di luar. Buktikan bahwa kau lebih dari sekadar badut.\"",
-	"combat_cleared": "*Sesuatu bergeser di udara...*\n\n\"Kau sudah membuktikannya pada dirimu sendiri.\n\nAda sesuatu di ujung sana yang menunggumu. Kau tahu apa itu.\""
+	"combat_cleared": "*Sesuatu bergeser di udara...*\n\n\"Kau sudah membuktikannya pada dirimu sendiri.\n\nAda sesuatu di ujung sana yang menunggumu. Kau tahu apa itu.\n\nPergi menuju penjara bawah\""
 }
