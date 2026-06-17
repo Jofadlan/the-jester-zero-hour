@@ -141,3 +141,18 @@ func complete_tutorial():
 	tutorial_done = true
 
 var target_spawn_node: String = ""
+
+func reset_progress() -> void:
+	joker_slots = [null, null]
+	collected_jokers = []
+	corruption = 0
+	gold = 0
+	talked_to_priestess = false
+	talked_to_emperor = false
+	talked_to_magician = false
+	normal_combat_cleared = false
+	combat_mode = "normal"
+	tutorial_done = false
+	target_spawn_node = ""
+	_init_discovery_state()
+	UICorruptionTint.force_sync()

@@ -24,7 +24,7 @@ func _ready():
 	$UI.visible = true
 	dialogue_box.hide()
 	popup_panel.hide()
-
+	btn_close.grab_focus()
 	btn_next.pressed.connect(_advance_dialogue)
 	btn_close.pressed.connect(_close_dialogue)
 	btn_choice_1.pressed.connect(_on_choice_pressed.bind(0))
@@ -247,6 +247,7 @@ func _give_joker_to_player(type: JokerData.JokerType) -> void:
 var _on_dialogue_end: Callable = Callable()
 
 func _open_dialogue(speaker: String, lines: Array[String], choices: Array = [], on_end: Callable = Callable()) -> void:
+	btn_next.grab_focus()
 	_current_speaker  = speaker
 	_dialogue_queue   = lines.duplicate()
 	_pending_choices  = choices
@@ -270,6 +271,7 @@ func _close_dialogue():
 		_on_dialogue_end.call()
 		_on_dialogue_end = Callable()
 func _advance_dialogue():
+	btn_next.grab_focus()
 	if not _dialogue_queue.is_empty():
 		label_speaker.text = _current_speaker
 		label_text.text    = _dialogue_queue.pop_front()

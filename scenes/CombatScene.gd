@@ -74,6 +74,10 @@ const HAND_NAMES = {
 	8: "Straight Flush", 9: "Royal Flush"}
 
 func _ready():
+	btn_choice1.grab_focus()
+	btn_choice2.grab_focus()
+	btn_continue.grab_focus()
+	btn_stop.grab_focus()
 	evaluator = HandEvaluator.new()
 	jp_manager.jp_changed.connect(_on_jp_changed)
 	
@@ -560,6 +564,9 @@ func _check_narrative_trigger():
 			return
 
 func _trigger_narrative(phase: NarrativePhase):
+	btn_tutorial_next.grab_focus()
+	btn_choice1.grab_focus()
+	btn_choice2.grab_focus()
 	_set_combat_ui_visible(false)
 	phase.already_triggered = true
 	current_narrative = phase
@@ -633,6 +640,7 @@ func _show_top_deck_preview() -> void:
 	hand_type_label.text = "Deck: " + ", ".join(names) + "..."
 
 func _show_tutorial() -> void:
+	btn_tutorial_next.grab_focus()
 	_set_combat_ui_visible(false)
 	tutorial_panel.visible = true
 	tutorial_text.text = _tutorial_slides[0]
@@ -643,6 +651,7 @@ func _on_tutorial_skip() -> void:
 	_end_tutorial()
 
 func _on_tutorial_next():
+	btn_tutorial_next.grab_focus()
 	_tutorial_index += 1
 	if _tutorial_index >= _tutorial_slides.size():
 		_end_tutorial()

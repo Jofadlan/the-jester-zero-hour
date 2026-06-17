@@ -9,7 +9,7 @@ var _index: int = 0
 
 const SLIDES: Array[String] = [
 	"*Suara muncul dari tempat yang tidak bisa kau tunjuk...*\n\n\"Selamat datang, Jester.\n\nKau baru saja menyaksikan dunia hancur. Dan kini kau kembali — dua puluh tahun sebelumnya — dengan ingatan yang seharusnya tidak kau miliki.\"",
-	"\"Bergeraklah dengan WASD atau tombol panah.\n\nJika ada NPC di dekatmu, indikator [E] akan muncul. Tekan E untuk berbicara.\n\nMereka belum tahu apa yang kau tahu. Jaga itu.\"",
+	"\"Bergeraklah dengan Tombol Panah atau WASD.\n\nJika ada NPC di dekatmu, indikator [E] akan muncul. Tekan E untuk berbicara.\n\nMereka belum tahu apa yang kau tahu. Jaga itu.\"",
 	"\"Kau akan bertarung. Bukan dengan pedang — dengan kartu.\n\nBentuk kombinasi poker terbaik dari 7 kartu yang diberikan. Skor terakumulasi hingga mencapai target.\n\nJika gagal... ada konsekuensinya.\"",
 	"*Suara itu memudar, hampir seperti tidak pernah ada*\n\n\"Aku tidak bisa memberitahumu apa yang benar. Tidak ada yang bisa.\n\nYang bisa kulakukan hanya menemanimu — sampai kau tidak membutuhkanku lagi.\n\nAtau sampai semuanya berakhir. Lagi.\""
 ]
@@ -24,12 +24,14 @@ func _ready() -> void:
 	text_label.text = SLIDES[0]
 	btn_next.text = "Lanjut ▶"
 	btn_skip.text = "Lewati"
+	btn_next.grab_focus()
 
 func _on_skip() -> void:
 	GameManager.complete_tutorial()
 	_go_to_royal_hall()
 	
 func _on_next() -> void:
+	btn_next.grab_focus()
 	_index += 1
 	if _index >= SLIDES.size():
 		GameManager.tutorial_done = true
