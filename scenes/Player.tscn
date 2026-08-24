@@ -199,6 +199,7 @@ radius = 12.0415945
 size = Vector2(80, 80)
 
 [node name="Player" type="CharacterBody2D" unique_id=564744777]
+y_sort_enabled = true
 script = ExtResource("1_p0vlq")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=361580617]
@@ -212,6 +213,7 @@ shape = SubResource("CircleShape2D_v6fml")
 
 [node name="InteractionArea" type="Area2D" parent="." unique_id=1429807088]
 visible = false
+y_sort_enabled = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea" unique_id=935224979]
 shape = SubResource("RectangleShape2D_v6fml")
